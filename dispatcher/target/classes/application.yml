@@ -1,0 +1,6 @@
+server:
+  port: 8084
+
+bot:
+  name: file_hosting_telegram_bot
+  token: 7210054109:AAGGEWpCHyNBK__jnObakCQ6fpd29XGoxjM
