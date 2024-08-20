@@ -46,7 +46,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 			log.error("Unsupported message type is received: " + update);
 		}
 	}
-	private void sendAnswerMessage(SendMessage sendMessage) {
+	public void sendAnswerMessage(SendMessage sendMessage) {
 		if (sendMessage != null) {
 			try {
 				execute(sendMessage);
