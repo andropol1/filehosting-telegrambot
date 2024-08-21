@@ -57,13 +57,13 @@ public class TelegramBot extends TelegramLongPollingBot {
 	}
 	private void filterMessagesByContent(Update update) {
 		Message message = update.getMessage();
-		if (message.getText() != null){
+		if (message.hasText()){
 			messageUtils.processTextMessage(update);
 			setFileIsReceived(update);
-		} else if (message.getDocument() != null) {
+		} else if (message.hasDocument()) {
 			messageUtils.processDocMessage(update);
 			setFileIsReceived(update);
-		} else if (message.getPhoto() != null) {
+		} else if (message.hasPhoto()) {
 			messageUtils.processPhotoMessage(update);
 			setFileIsReceived(update);
 		} else {
