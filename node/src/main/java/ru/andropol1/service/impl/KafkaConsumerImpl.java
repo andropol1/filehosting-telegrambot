@@ -7,11 +7,16 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 import ru.andropol1.config.KafkaProperties;
+import ru.andropol1.entity.AppUser;
 import ru.andropol1.entity.TelegramMessage;
+import ru.andropol1.repository.AppUserRepository;
 import ru.andropol1.repository.TelegramMessageRepository;
 import ru.andropol1.service.KafkaConsumer;
 import ru.andropol1.service.KafkaProducer;
+
+import static ru.andropol1.enums.UserState.BASIC_STATE;
 
 @Service
 @Log4j
@@ -19,13 +24,15 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 	private final KafkaProperties kafkaProperties;
 	private final KafkaProducer kafkaProducer;
 	private final  TelegramMessageRepository telegramMessageRepository;
+	private final AppUserRepository appUserRepository;
 
 	@Autowired
 	public KafkaConsumerImpl(KafkaProperties kafkaProperties, KafkaProducer kafkaProducer,
-							 TelegramMessageRepository telegramMessageRepository) {
+							 TelegramMessageRepository telegramMessageRepository, AppUserRepository appUserRepository) {
 		this.kafkaProperties = kafkaProperties;
 		this.kafkaProducer = kafkaProducer;
 		this.telegramMessageRepository = telegramMessageRepository;
+		this.appUserRepository = appUserRepository;
 	}
 
 	@Override
@@ -34,6 +41,8 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 		log.debug("consumeTextMessage");
 		saveUpdate(update);
 		Message message = update.getMessage();
+		User user = message.getFrom();
+		AppUser appUser = findOrSaveAppUser(user);
 		SendMessage sendMessage = new SendMessage();
 		sendMessage.setText("Node");
 		sendMessage.setChatId(message.getChatId());
@@ -56,5 +65,20 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 				.update(update)
 				.build();
 		telegramMessageRepository.save(telegramMessage);
+	}
+	private AppUser findOrSaveAppUser(User user){
+		AppUser persistentUser = appUserRepository.findAppUserByTelegramUserId(user.getId());
+		if (persistentUser == null){
+			AppUser transientUser = AppUser.builder()
+					.telegramUserId(user.getId())
+					.userName(user.getUserName())
+					.firstName(user.getFirstName())
+					.lastName(user.getLastName())
+					.isActive(true)
+					.userState(BASIC_STATE)
+					.build();
+			return appUserRepository.save(transientUser);
+		}
+		return persistentUser;
 	}
 }

@@ -22,6 +22,6 @@ public class TelegramMessage {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	@Type(type = "jsonb")
-	@Column(columnDefinition = "")
+	@Column(columnDefinition = "jsonb")
 	private Update update;
 }
