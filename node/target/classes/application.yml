@@ -6,3 +6,11 @@ kafka:
   photo_message: "photo_message"
   text_message: "text_message"
   answer_message: "answer_message"
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/test_db
+    username: postgres
+    password: postgres
+  jpa:
+    generate-ddl: true
