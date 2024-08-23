@@ -11,12 +11,15 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import ru.andropol1.config.KafkaProperties;
 import ru.andropol1.entity.AppUser;
 import ru.andropol1.entity.TelegramMessage;
+import ru.andropol1.enums.UserState;
 import ru.andropol1.repository.AppUserRepository;
 import ru.andropol1.repository.TelegramMessageRepository;
 import ru.andropol1.service.KafkaConsumer;
 import ru.andropol1.service.KafkaProducer;
 
+import static ru.andropol1.enums.ServiceCommands.*;
 import static ru.andropol1.enums.UserState.BASIC_STATE;
+import static ru.andropol1.enums.UserState.WAIT_FOR_EMAIL_STATE;
 
 @Service
 @Log4j
@@ -40,25 +43,90 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 	public void consumeTextMessage(Update update) {
 		log.debug("consumeTextMessage");
 		saveUpdate(update);
-		Message message = update.getMessage();
-		User user = message.getFrom();
-		AppUser appUser = findOrSaveAppUser(user);
+		AppUser appUser = findOrSaveAppUser(update);
+		UserState userState = appUser.getUserState();
+		String cmd = update.getMessage().getText();
+		String output = "";
+		if (CANCEL.equals(cmd)){
+			output = cancelProcess(appUser);
+		} else if (BASIC_STATE.equals(userState)) {
+			output = processServiceCommand(appUser, cmd);
+		} else if (WAIT_FOR_EMAIL_STATE.equals(userState)) {
+			//TODO
+		} else {
+			log.error("Unknown user state: " + userState);
+			output = "Неизвестная ошибка! Введите /cancel и попробуйте снова!";
+		}
+		Long chatId = update.getMessage().getChatId();
+		sendAnswer(output, chatId);
+	}
+
+	private void sendAnswer(String output, Long chatId) {
 		SendMessage sendMessage = new SendMessage();
-		sendMessage.setText("Node");
-		sendMessage.setChatId(message.getChatId());
+		sendMessage.setText(output);
+		sendMessage.setChatId(chatId);
 		kafkaProducer.produce(sendMessage);
+	}
+
+	private String processServiceCommand(AppUser appUser, String cmd) {
+		if (REGISTRATION.equals(cmd)){
+			//TODO
+			return "Временно недоступно.";
+		} else if (HELP.equals(cmd)) {
+			return "Cписок доступных команд:\n"
+					+ "/cancel - отмена выполнения текущей команды;\n"
+					+ "/registration - регистрация пользователя.";
+		} else if (START.equals(cmd)) {
+			return "Привет! Чтобы посмотреть список доступных команд введите /help";
+		} else {
+			return "Неверная команда! Чтобы посмотреть список доступных команд введите /help";
+		 }
+	}
+
+	private String cancelProcess(AppUser appUser) {
+		appUser.setUserState(BASIC_STATE);
+		appUserRepository.save(appUser);
+		return "Команда отменена!";
 	}
 
 	@Override
 	@KafkaListener(topics = "#{kafkaProperties.getDoc_message()}", groupId = "group")
 	public void consumeDocMessage(Update update) {
 		log.debug("consumeDocMessage");
+		saveUpdate(update);
+		AppUser appUser = findOrSaveAppUser(update);
+		Long chatId = update.getMessage().getChatId();
+		if (isNotAllowedToSendContent(chatId, appUser)){
+			return;
+		}
+		String answer = "Документ успешно загружен! Ссылка для скачивания: ";
+		sendAnswer(answer, chatId);
 	}
-
 	@Override
 	@KafkaListener(topics = "#{kafkaProperties.getPhoto_message()}", groupId = "group")
 	public void consumePhotoMessage(Update update) {
 		log.debug("consumePhotoMessage");
+		saveUpdate(update);
+		AppUser appUser = findOrSaveAppUser(update);
+		Long chatId = update.getMessage().getChatId();
+		if (isNotAllowedToSendContent(chatId, appUser)){
+			return;
+		}
+		String answer = "Фото успешно загружено! Ссылка для скачивания: ";
+		sendAnswer(answer, chatId);
+	}
+	private boolean isNotAllowedToSendContent(Long chatId, AppUser appUser) {
+		UserState userState = appUser.getUserState();
+		if (!appUser.getIsActive()){
+			String error = "Зарегистрируйтесь или активируйте свою учетную запись для загрузки контента.";
+			sendAnswer(error, chatId);
+			return true;
+		} else if (!BASIC_STATE.equals(userState)){
+			String error = "Отмените текущую команду с помощью /cancel для отправки файлов.";
+			sendAnswer(error, chatId);
+			return true;
+		}
+		return false;
 	}
 	private void saveUpdate(Update update){
 		TelegramMessage telegramMessage = TelegramMessage.builder()
@@ -66,7 +134,8 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 				.build();
 		telegramMessageRepository.save(telegramMessage);
 	}
-	private AppUser findOrSaveAppUser(User user){
+	private AppUser findOrSaveAppUser(Update update){
+		User user = update.getMessage().getFrom();
 		AppUser persistentUser = appUserRepository.findAppUserByTelegramUserId(user.getId());
 		if (persistentUser == null){
 			AppUser transientUser = AppUser.builder()
