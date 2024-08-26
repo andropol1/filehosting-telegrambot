@@ -1,10 +1,10 @@
 package ru.andropol1.entity;
 
+import javax.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import ru.andropol1.enums.UserState;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Getter

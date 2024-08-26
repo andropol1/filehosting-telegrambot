@@ -1,12 +1,12 @@
 package ru.andropol1.entity;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import javax.persistence.*;
 import lombok.*;
+
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.telegram.telegrambots.meta.api.objects.Update;
-
-import javax.persistence.*;
 
 @Getter
 @Setter

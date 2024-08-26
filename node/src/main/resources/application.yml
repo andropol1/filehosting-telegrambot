@@ -14,3 +14,7 @@ spring:
     password: postgres
   jpa:
     generate-ddl: true
+bot:
+  token: 7210054109:AAGGEWpCHyNBK__jnObakCQ6fpd29XGoxjM
+  file_info_uri: https://api.telegram.org/bot{token}/getFile?file_id={fileId}
+  file_storage_uri: https://api.telegram.org/file/bot{token}/{filePath}

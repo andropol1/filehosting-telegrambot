@@ -60,8 +60,10 @@ public class TelegramBot extends TelegramLongPollingBot {
 		if (message.hasText()){
 			messageUtils.processTextMessage(update);
 		} else if (message.hasDocument()) {
+			setFileIsReceived(update);
 			messageUtils.processDocMessage(update);
 		} else if (message.hasPhoto()) {
+			setFileIsReceived(update);
 			messageUtils.processPhotoMessage(update);
 		} else {
 			setUnsupportedMessage(update);

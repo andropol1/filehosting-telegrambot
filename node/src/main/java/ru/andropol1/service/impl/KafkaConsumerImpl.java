@@ -5,15 +5,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import ru.andropol1.config.KafkaProperties;
+import ru.andropol1.entity.AppDocument;
 import ru.andropol1.entity.AppUser;
 import ru.andropol1.entity.TelegramMessage;
 import ru.andropol1.enums.UserState;
+import ru.andropol1.exceptions.UploadFileException;
 import ru.andropol1.repository.AppUserRepository;
 import ru.andropol1.repository.TelegramMessageRepository;
+import ru.andropol1.service.FIleService;
 import ru.andropol1.service.KafkaConsumer;
 import ru.andropol1.service.KafkaProducer;
 
@@ -28,14 +30,16 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 	private final KafkaProducer kafkaProducer;
 	private final  TelegramMessageRepository telegramMessageRepository;
 	private final AppUserRepository appUserRepository;
+	private final FIleService fIleService;
 
 	@Autowired
 	public KafkaConsumerImpl(KafkaProperties kafkaProperties, KafkaProducer kafkaProducer,
-							 TelegramMessageRepository telegramMessageRepository, AppUserRepository appUserRepository) {
+							 TelegramMessageRepository telegramMessageRepository, AppUserRepository appUserRepository, FIleService fIleService) {
 		this.kafkaProperties = kafkaProperties;
 		this.kafkaProducer = kafkaProducer;
 		this.telegramMessageRepository = telegramMessageRepository;
 		this.appUserRepository = appUserRepository;
+		this.fIleService = fIleService;
 	}
 
 	@Override
@@ -99,8 +103,16 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 		if (isNotAllowedToSendContent(chatId, appUser)){
 			return;
 		}
-		String answer = "Документ успешно загружен! Ссылка для скачивания: ";
-		sendAnswer(answer, chatId);
+		try{
+			AppDocument appDocument = fIleService.processDoc(update.getMessage());
+			//TODO генерация ссылки
+			String answer = "Документ успешно загружен! Ссылка для скачивания: ";
+			sendAnswer(answer, chatId);
+		} catch (UploadFileException e){
+			log.error(e);
+			String error = "К сожалению, загрузка файла не удалась. Повторите попытку позже.";
+			sendAnswer(error, chatId);
+		}
 	}
 	@Override
 	@KafkaListener(topics = "#{kafkaProperties.getPhoto_message()}", groupId = "group")

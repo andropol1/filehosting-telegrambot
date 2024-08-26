@@ -22,6 +22,10 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
         </dependency>
@@ -50,6 +54,7 @@
             <artifactId>hibernate-types-52</artifactId>
             <version>2.2.2</version>
         </dependency>
+
     </dependencies>
 
 </project>
