@@ -9,6 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import ru.andropol1.config.KafkaProperties;
 import ru.andropol1.entity.AppDocument;
+import ru.andropol1.entity.AppPhoto;
 import ru.andropol1.entity.AppUser;
 import ru.andropol1.entity.TelegramMessage;
 import ru.andropol1.enums.UserState;
@@ -124,8 +125,15 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 		if (isNotAllowedToSendContent(chatId, appUser)){
 			return;
 		}
-		String answer = "Фото успешно загружено! Ссылка для скачивания: ";
-		sendAnswer(answer, chatId);
+		try	{
+			AppPhoto appPhoto = fIleService.processPhoto(update.getMessage());
+			String answer = "Фото успешно загружено! Ссылка для скачивания: ";
+			sendAnswer(answer, chatId);
+		} catch (UploadFileException e){
+			log.error(e);
+			String error = "К сожалению, загрузка фото не удалась. Повторите попытку позже.";
+			sendAnswer(error, chatId);
+		}
 	}
 	private boolean isNotAllowedToSendContent(Long chatId, AppUser appUser) {
 		UserState userState = appUser.getUserState();

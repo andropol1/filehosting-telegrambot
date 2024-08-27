@@ -1,7 +1,8 @@
 package ru.andropol1.entity;
 
-import javax.persistence.*;
 import lombok.*;
+
+import javax.persistence.*;
 
 @Getter
 @Setter
@@ -10,10 +11,13 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "binary_content")
-public class BinaryContent {
+@Table(name = "app_photo")
+public class AppPhoto {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private byte[] fileAsArrayOfBytes;
+	private String telegramFileId;
+	@OneToOne
+	private BinaryContent binaryContent;
+	private Integer fileSize;
 }

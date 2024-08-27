@@ -9,11 +9,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import ru.andropol1.config.BotProperties;
 import ru.andropol1.entity.AppDocument;
+import ru.andropol1.entity.AppPhoto;
 import ru.andropol1.entity.BinaryContent;
 import ru.andropol1.exceptions.UploadFileException;
 import ru.andropol1.repository.AppDocumentRepository;
+import ru.andropol1.repository.AppPhotoRepository;
 import ru.andropol1.repository.BinaryContentRepository;
 import ru.andropol1.service.FIleService;
 
@@ -27,12 +30,14 @@ import java.util.Objects;
 @Service
 public class FIleServiceImpl implements FIleService {
 	private final AppDocumentRepository appDocumentRepository;
+	private final AppPhotoRepository appPhotoRepository;
 	private final BinaryContentRepository binaryContentRepository;
 	private final BotProperties botProperties;
 	private final WebClient webClient;
 	@Autowired
-	public FIleServiceImpl(AppDocumentRepository appDocumentRepository, BinaryContentRepository binaryContentRepository, BotProperties botProperties) {
+	public FIleServiceImpl(AppDocumentRepository appDocumentRepository, AppPhotoRepository appPhotoRepository, BinaryContentRepository binaryContentRepository, BotProperties botProperties) {
 		this.appDocumentRepository = appDocumentRepository;
+		this.appPhotoRepository = appPhotoRepository;
 		this.binaryContentRepository = binaryContentRepository;
 		this.botProperties = botProperties;
 		this.webClient = WebClient.create();
@@ -40,22 +45,49 @@ public class FIleServiceImpl implements FIleService {
 
 	@Override
 	public AppDocument processDoc(Message message) {
+		Document document = message.getDocument();
 		String fileId = message.getDocument().getFileId();
 		ResponseEntity<String> response = getFilePath(fileId);
 		if (response.getStatusCode() == HttpStatus.OK){
-			JSONObject jsonObject = new JSONObject(Objects.requireNonNull(response.getBody()));
-			String filePath = jsonObject.getJSONObject("result").getString("file_path");
-			byte[] fileInByte = downloadFile(filePath);
-			BinaryContent transientBinaryContent = BinaryContent.builder()
-					.fileAsArrayOfBytes(fileInByte)
-					.build();
-			BinaryContent persistentBinaryContent = binaryContentRepository.save(transientBinaryContent);
-			Document document = message.getDocument();
+			BinaryContent persistentBinaryContent = getPersistentBinaryContent(response);
 			AppDocument transientAppDoc = buildTransientAppDoc(document, persistentBinaryContent);
 			return appDocumentRepository.save(transientAppDoc);
 		} else {
 			throw new UploadFileException("Bad response from telegram service: " + response);
 		}
+	}
+
+	@Override
+	public AppPhoto processPhoto(Message message) {
+		PhotoSize photo = message.getPhoto().get(0);
+		String fileId = message.getDocument().getFileId();
+		ResponseEntity<String> response = getFilePath(fileId);
+		if (response.getStatusCode() == HttpStatus.OK){
+			BinaryContent persistentBinaryContent = getPersistentBinaryContent(response);
+			AppPhoto transientAppPhoto = buildTransientAppPhoto(photo, persistentBinaryContent);
+			return appPhotoRepository.save(transientAppPhoto);
+		} else {
+			throw new UploadFileException("Bad response from telegram service: " + response);
+		}
+	}
+
+	private AppPhoto buildTransientAppPhoto(PhotoSize photo, BinaryContent persistentBinaryContent) {
+		return AppPhoto.builder()
+				.telegramFileId(photo.getFileId())
+				.binaryContent(persistentBinaryContent)
+				.fileSize(photo.getFileSize())
+				.build();
+	}
+
+	private BinaryContent getPersistentBinaryContent(ResponseEntity<String> response){
+		JSONObject jsonObject = new JSONObject(Objects.requireNonNull(response.getBody()));
+		String filePath = jsonObject.getJSONObject("result").getString("file_path");
+		byte[] fileInByte = downloadFile(filePath);
+		BinaryContent transientBinaryContent = BinaryContent.builder()
+				.fileAsArrayOfBytes(fileInByte)
+				.build();
+		return binaryContentRepository.save(transientBinaryContent);
+
 	}
 
 	private AppDocument buildTransientAppDoc(Document document, BinaryContent persistentBinaryContent) {
