@@ -1,0 +1,10 @@
+server:
+  port: 8086
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/test_db
+    username: postgres
+    password: postgres
+  jpa:
+    generate-ddl: true

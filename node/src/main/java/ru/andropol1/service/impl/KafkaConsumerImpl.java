@@ -16,7 +16,7 @@ import ru.andropol1.enums.UserState;
 import ru.andropol1.exceptions.UploadFileException;
 import ru.andropol1.repository.AppUserRepository;
 import ru.andropol1.repository.TelegramMessageRepository;
-import ru.andropol1.service.FIleService;
+import ru.andropol1.service.FiIeService;
 import ru.andropol1.service.KafkaConsumer;
 import ru.andropol1.service.KafkaProducer;
 
@@ -31,16 +31,16 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 	private final KafkaProducer kafkaProducer;
 	private final  TelegramMessageRepository telegramMessageRepository;
 	private final AppUserRepository appUserRepository;
-	private final FIleService fIleService;
+	private final FiIeService fiIeService;
 
 	@Autowired
 	public KafkaConsumerImpl(KafkaProperties kafkaProperties, KafkaProducer kafkaProducer,
-							 TelegramMessageRepository telegramMessageRepository, AppUserRepository appUserRepository, FIleService fIleService) {
+							 TelegramMessageRepository telegramMessageRepository, AppUserRepository appUserRepository, FiIeService fiIeService) {
 		this.kafkaProperties = kafkaProperties;
 		this.kafkaProducer = kafkaProducer;
 		this.telegramMessageRepository = telegramMessageRepository;
 		this.appUserRepository = appUserRepository;
-		this.fIleService = fIleService;
+		this.fiIeService = fiIeService;
 	}
 
 	@Override
@@ -105,7 +105,7 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 			return;
 		}
 		try{
-			AppDocument appDocument = fIleService.processDoc(update.getMessage());
+			AppDocument appDocument = fiIeService.processDoc(update.getMessage());
 			//TODO генерация ссылки
 			String answer = "Документ успешно загружен! Ссылка для скачивания: ";
 			sendAnswer(answer, chatId);
@@ -126,7 +126,7 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 			return;
 		}
 		try	{
-			AppPhoto appPhoto = fIleService.processPhoto(update.getMessage());
+			AppPhoto appPhoto = fiIeService.processPhoto(update.getMessage());
 			String answer = "Фото успешно загружено! Ссылка для скачивания: ";
 			sendAnswer(answer, chatId);
 		} catch (UploadFileException e){

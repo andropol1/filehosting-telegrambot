@@ -18,7 +18,7 @@ import ru.andropol1.exceptions.UploadFileException;
 import ru.andropol1.repository.AppDocumentRepository;
 import ru.andropol1.repository.AppPhotoRepository;
 import ru.andropol1.repository.BinaryContentRepository;
-import ru.andropol1.service.FIleService;
+import ru.andropol1.service.FiIeService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,14 +28,14 @@ import java.util.Objects;
 
 @Log4j
 @Service
-public class FIleServiceImpl implements FIleService {
+public class FiIeServiceImpl implements FiIeService {
 	private final AppDocumentRepository appDocumentRepository;
 	private final AppPhotoRepository appPhotoRepository;
 	private final BinaryContentRepository binaryContentRepository;
 	private final BotProperties botProperties;
 	private final WebClient webClient;
 	@Autowired
-	public FIleServiceImpl(AppDocumentRepository appDocumentRepository, AppPhotoRepository appPhotoRepository, BinaryContentRepository binaryContentRepository, BotProperties botProperties) {
+	public FiIeServiceImpl(AppDocumentRepository appDocumentRepository, AppPhotoRepository appPhotoRepository, BinaryContentRepository binaryContentRepository, BotProperties botProperties) {
 		this.appDocumentRepository = appDocumentRepository;
 		this.appPhotoRepository = appPhotoRepository;
 		this.binaryContentRepository = binaryContentRepository;
@@ -60,7 +60,7 @@ public class FIleServiceImpl implements FIleService {
 	@Override
 	public AppPhoto processPhoto(Message message) {
 		PhotoSize photo = message.getPhoto().get(0);
-		String fileId = message.getDocument().getFileId();
+		String fileId = photo.getFileId();
 		ResponseEntity<String> response = getFilePath(fileId);
 		if (response.getStatusCode() == HttpStatus.OK){
 			BinaryContent persistentBinaryContent = getPersistentBinaryContent(response);
