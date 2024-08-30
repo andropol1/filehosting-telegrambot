@@ -1,6 +1,7 @@
 package ru.andropol1.service.impl;
 
 import lombok.extern.log4j.Log4j;
+import org.hashids.Hashids;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,11 +15,12 @@ import ru.andropol1.config.BotProperties;
 import ru.andropol1.entity.AppDocument;
 import ru.andropol1.entity.AppPhoto;
 import ru.andropol1.entity.BinaryContent;
+import ru.andropol1.enums.LinkType;
 import ru.andropol1.exceptions.UploadFileException;
 import ru.andropol1.repository.AppDocumentRepository;
 import ru.andropol1.repository.AppPhotoRepository;
 import ru.andropol1.repository.BinaryContentRepository;
-import ru.andropol1.service.FiIeService;
+import ru.andropol1.service.FileService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,18 +30,22 @@ import java.util.Objects;
 
 @Log4j
 @Service
-public class FiIeServiceImpl implements FiIeService {
+public class FileServiceImpl implements FileService {
 	private final AppDocumentRepository appDocumentRepository;
 	private final AppPhotoRepository appPhotoRepository;
 	private final BinaryContentRepository binaryContentRepository;
 	private final BotProperties botProperties;
 	private final WebClient webClient;
+	private final Hashids hashids;
 	@Autowired
-	public FiIeServiceImpl(AppDocumentRepository appDocumentRepository, AppPhotoRepository appPhotoRepository, BinaryContentRepository binaryContentRepository, BotProperties botProperties) {
+	public FileServiceImpl(AppDocumentRepository appDocumentRepository, AppPhotoRepository appPhotoRepository,
+						   BinaryContentRepository binaryContentRepository,
+						   BotProperties botProperties, Hashids hashids) {
 		this.appDocumentRepository = appDocumentRepository;
 		this.appPhotoRepository = appPhotoRepository;
 		this.binaryContentRepository = binaryContentRepository;
 		this.botProperties = botProperties;
+		this.hashids = hashids;
 		this.webClient = WebClient.create();
 	}
 
@@ -59,7 +65,9 @@ public class FiIeServiceImpl implements FiIeService {
 
 	@Override
 	public AppPhoto processPhoto(Message message) {
-		PhotoSize photo = message.getPhoto().get(0);
+		int photoSize = message.getPhoto().size();
+		int photoIndex = photoSize > 1 ? message.getPhoto().size() - 1 : 0;
+		PhotoSize photo = message.getPhoto().get(photoIndex);
 		String fileId = photo.getFileId();
 		ResponseEntity<String> response = getFilePath(fileId);
 		if (response.getStatusCode() == HttpStatus.OK){
@@ -69,6 +77,12 @@ public class FiIeServiceImpl implements FiIeService {
 		} else {
 			throw new UploadFileException("Bad response from telegram service: " + response);
 		}
+	}
+
+	@Override
+	public String generateLink(Long docId, LinkType linkType) {
+		String hash = hashids.encode(docId);
+		return "http://" + botProperties.getLinkAddress() +  "/" + linkType + "?id=" + hash;
 	}
 
 	private AppPhoto buildTransientAppPhoto(PhotoSize photo, BinaryContent persistentBinaryContent) {

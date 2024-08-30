@@ -8,3 +8,7 @@ spring:
     password: postgres
   jpa:
     generate-ddl: true
+
+decoder:
+  salt: gKkCxjMgxK
+  minHashLength: 10

@@ -11,4 +11,5 @@ public class BotProperties{
 	private String token;
 	private String file_info_uri;
 	private String file_storage_uri;
+	private String linkAddress;
 }

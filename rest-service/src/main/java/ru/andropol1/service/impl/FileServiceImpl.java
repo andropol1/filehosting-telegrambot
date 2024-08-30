@@ -11,6 +11,7 @@ import ru.andropol1.entity.BinaryContent;
 import ru.andropol1.repository.AppDocumentRepository;
 import ru.andropol1.repository.AppPhotoRepository;
 import ru.andropol1.service.FileService;
+import ru.andropol1.utils.Decoder;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,21 +22,23 @@ import java.util.Optional;
 public class FileServiceImpl implements FileService {
 	private final AppDocumentRepository appDocumentRepository;
 	private final AppPhotoRepository appPhotoRepository;
+	private final Decoder decoder;
 	@Autowired
-	public FileServiceImpl(AppDocumentRepository appDocumentRepository, AppPhotoRepository appPhotoRepository) {
+	public FileServiceImpl(AppDocumentRepository appDocumentRepository, AppPhotoRepository appPhotoRepository, Decoder decoder) {
 		this.appDocumentRepository = appDocumentRepository;
 		this.appPhotoRepository = appPhotoRepository;
+		this.decoder = decoder;
 	}
 
 	@Override
-	public Optional<AppDocument> getDocument(String docId) {
-		long id = Long.parseLong(docId);
+	public Optional<AppDocument> getDocument(String hash) {
+		Long id = decoder.idOf(hash);
 		return appDocumentRepository.findById(id);
 	}
 
 	@Override
-	public Optional<AppPhoto> getPhoto(String photoId) {
-		long id = Long.parseLong(photoId);
+	public Optional<AppPhoto> getPhoto(String hash) {
+		Long id = decoder.idOf(hash);
 		return appPhotoRepository.findById(id);
 	}
 

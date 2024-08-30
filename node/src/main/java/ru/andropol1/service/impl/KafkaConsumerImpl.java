@@ -12,11 +12,12 @@ import ru.andropol1.entity.AppDocument;
 import ru.andropol1.entity.AppPhoto;
 import ru.andropol1.entity.AppUser;
 import ru.andropol1.entity.TelegramMessage;
+import ru.andropol1.enums.LinkType;
 import ru.andropol1.enums.UserState;
 import ru.andropol1.exceptions.UploadFileException;
 import ru.andropol1.repository.AppUserRepository;
 import ru.andropol1.repository.TelegramMessageRepository;
-import ru.andropol1.service.FiIeService;
+import ru.andropol1.service.FileService;
 import ru.andropol1.service.KafkaConsumer;
 import ru.andropol1.service.KafkaProducer;
 
@@ -31,16 +32,16 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 	private final KafkaProducer kafkaProducer;
 	private final  TelegramMessageRepository telegramMessageRepository;
 	private final AppUserRepository appUserRepository;
-	private final FiIeService fiIeService;
+	private final FileService fileService;
 
 	@Autowired
 	public KafkaConsumerImpl(KafkaProperties kafkaProperties, KafkaProducer kafkaProducer,
-							 TelegramMessageRepository telegramMessageRepository, AppUserRepository appUserRepository, FiIeService fiIeService) {
+							 TelegramMessageRepository telegramMessageRepository, AppUserRepository appUserRepository, FileService fileService) {
 		this.kafkaProperties = kafkaProperties;
 		this.kafkaProducer = kafkaProducer;
 		this.telegramMessageRepository = telegramMessageRepository;
 		this.appUserRepository = appUserRepository;
-		this.fiIeService = fiIeService;
+		this.fileService = fileService;
 	}
 
 	@Override
@@ -105,9 +106,9 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 			return;
 		}
 		try{
-			AppDocument appDocument = fiIeService.processDoc(update.getMessage());
-			//TODO генерация ссылки
-			String answer = "Документ успешно загружен! Ссылка для скачивания: ";
+			AppDocument appDocument = fileService.processDoc(update.getMessage());
+			String link = fileService.generateLink(appDocument.getId(), LinkType.GET_DOC);
+			String answer = "Документ успешно загружен! Ссылка для скачивания: " + link;
 			sendAnswer(answer, chatId);
 		} catch (UploadFileException e){
 			log.error(e);
@@ -126,8 +127,9 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 			return;
 		}
 		try	{
-			AppPhoto appPhoto = fiIeService.processPhoto(update.getMessage());
-			String answer = "Фото успешно загружено! Ссылка для скачивания: ";
+			AppPhoto appPhoto = fileService.processPhoto(update.getMessage());
+			String link = fileService.generateLink(appPhoto.getId(), LinkType.GET_PHOTO);
+			String answer = "Фото успешно загружено! Ссылка для скачивания: " + link;
 			sendAnswer(answer, chatId);
 		} catch (UploadFileException e){
 			log.error(e);
