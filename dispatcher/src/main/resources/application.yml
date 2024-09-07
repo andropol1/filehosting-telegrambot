@@ -1,9 +1,12 @@
 server:
   port: 8084
+  ssl:
+    enabled: false
 
 bot:
   name: file_hosting_telegram_bot
   token: 7210054109:AAGGEWpCHyNBK__jnObakCQ6fpd29XGoxjM
+  uri: https://0a6a-167-71-77-212.ngrok-free.app
 
 kafka:
   doc_message: "doc_message"

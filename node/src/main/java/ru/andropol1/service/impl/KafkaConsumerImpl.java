@@ -17,9 +17,12 @@ import ru.andropol1.enums.UserState;
 import ru.andropol1.exceptions.UploadFileException;
 import ru.andropol1.repository.AppUserRepository;
 import ru.andropol1.repository.TelegramMessageRepository;
+import ru.andropol1.service.AppUserService;
 import ru.andropol1.service.FileService;
 import ru.andropol1.service.KafkaConsumer;
 import ru.andropol1.service.KafkaProducer;
+
+import java.util.Optional;
 
 import static ru.andropol1.enums.ServiceCommands.*;
 import static ru.andropol1.enums.UserState.BASIC_STATE;
@@ -33,15 +36,17 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 	private final  TelegramMessageRepository telegramMessageRepository;
 	private final AppUserRepository appUserRepository;
 	private final FileService fileService;
+	private final AppUserService appUserService;
 
 	@Autowired
 	public KafkaConsumerImpl(KafkaProperties kafkaProperties, KafkaProducer kafkaProducer,
-							 TelegramMessageRepository telegramMessageRepository, AppUserRepository appUserRepository, FileService fileService) {
+							 TelegramMessageRepository telegramMessageRepository, AppUserRepository appUserRepository, FileService fileService, AppUserService appUserService) {
 		this.kafkaProperties = kafkaProperties;
 		this.kafkaProducer = kafkaProducer;
 		this.telegramMessageRepository = telegramMessageRepository;
 		this.appUserRepository = appUserRepository;
 		this.fileService = fileService;
+		this.appUserService = appUserService;
 	}
 
 	@Override
@@ -58,7 +63,7 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 		} else if (BASIC_STATE.equals(userState)) {
 			output = processServiceCommand(appUser, cmd);
 		} else if (WAIT_FOR_EMAIL_STATE.equals(userState)) {
-			//TODO
+			output = appUserService.setEmail(appUser, cmd);
 		} else {
 			log.error("Unknown user state: " + userState);
 			output = "Неизвестная ошибка! Введите /cancel и попробуйте снова!";
@@ -76,8 +81,7 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 
 	private String processServiceCommand(AppUser appUser, String cmd) {
 		if (REGISTRATION.equals(cmd)){
-			//TODO
-			return "Временно недоступно.";
+			return appUserService.registerUser(appUser);
 		} else if (HELP.equals(cmd)) {
 			return "Cписок доступных команд:\n"
 					+ "/cancel - отмена выполнения текущей команды;\n"
@@ -158,18 +162,18 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 	}
 	private AppUser findOrSaveAppUser(Update update){
 		User user = update.getMessage().getFrom();
-		AppUser persistentUser = appUserRepository.findAppUserByTelegramUserId(user.getId());
-		if (persistentUser == null){
+		Optional<AppUser> persistentUser = appUserRepository.findByTelegramUserId(user.getId());
+		if (persistentUser.isEmpty()){
 			AppUser transientUser = AppUser.builder()
 					.telegramUserId(user.getId())
 					.userName(user.getUserName())
 					.firstName(user.getFirstName())
 					.lastName(user.getLastName())
-					.isActive(true)
+					.isActive(false)
 					.userState(BASIC_STATE)
 					.build();
 			return appUserRepository.save(transientUser);
 		}
-		return persistentUser;
+		return persistentUser.get();
 	}
 }

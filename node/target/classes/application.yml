@@ -19,6 +19,7 @@ bot:
   file_info_uri: https://api.telegram.org/bot{token}/getFile?file_id={fileId}
   file_storage_uri: https://api.telegram.org/file/bot{token}/{filePath}
   linkAddress: 127.0.0.1:8086
+  mail_uri: http://127.0.0.1:8087/mail/send
 
 hash:
   salt: gKkCxjMgxK
