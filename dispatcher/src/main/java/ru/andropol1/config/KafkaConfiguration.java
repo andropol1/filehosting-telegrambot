@@ -19,13 +19,15 @@ import java.util.Map;
 @Configuration
 public class KafkaConfiguration {
 	@Bean
-	public KafkaProperties kafkaProperties(){
+	public KafkaProperties kafkaProperties() {
 		return new KafkaProperties();
 	}
+
 	@Bean
 	public KafkaTemplate<String, Update> kafkaTemplate() {
 		return new KafkaTemplate<>(producerFactory());
 	}
+
 	@Bean
 	public ProducerFactory<String, Update> producerFactory() {
 		Map<String, Object> configProps = new HashMap<>();
@@ -34,6 +36,7 @@ public class KafkaConfiguration {
 		configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 		return new DefaultKafkaProducerFactory<>(configProps);
 	}
+
 	@Bean
 	public ConsumerFactory<String, Update> consumerFactory() {
 		Map<String, Object> props = new HashMap<>();
@@ -54,20 +57,24 @@ public class KafkaConfiguration {
 		factory.setMessageConverter(new StringJsonMessageConverter());
 		return factory;
 	}
+
 	@Bean
-	public NewTopic docMessageTopic(){
+	public NewTopic docMessageTopic() {
 		return new NewTopic(kafkaProperties().getDoc_message(), 1, (short) 1);
 	}
+
 	@Bean
-	public NewTopic textMessageTopic(){
+	public NewTopic textMessageTopic() {
 		return new NewTopic(kafkaProperties().getText_message(), 1, (short) 1);
 	}
+
 	@Bean
-	public NewTopic photoMessageTopic(){
+	public NewTopic photoMessageTopic() {
 		return new NewTopic(kafkaProperties().getPhoto_message(), 1, (short) 1);
 	}
+
 	@Bean
-	public NewTopic answerMessageTopic(){
+	public NewTopic answerMessageTopic() {
 		return new NewTopic(kafkaProperties().getAnswer_message(), 1, (short) 1);
 	}
 }

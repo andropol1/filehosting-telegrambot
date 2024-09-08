@@ -2,10 +2,11 @@ server:
   port: 8085
 
 kafka:
-  doc_message: "doc_message"
-  photo_message: "photo_message"
-  text_message: "text_message"
-  answer_message: "answer_message"
+  doc_message: doc_message
+  photo_message: photo_message
+  text_message: text_message
+  answer_message: answer_message
+  registration_message: registration_message
 
 spring:
   datasource:

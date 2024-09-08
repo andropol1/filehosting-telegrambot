@@ -10,8 +10,8 @@ import javax.persistence.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
 @Table(name = "app_photo")
+@Entity
 public class AppPhoto {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

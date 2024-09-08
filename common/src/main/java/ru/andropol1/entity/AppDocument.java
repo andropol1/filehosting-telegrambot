@@ -1,6 +1,7 @@
 package ru.andropol1.entity;
 
 import javax.persistence.*;
+
 import lombok.*;
 
 @Getter
@@ -9,8 +10,8 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
 @Table(name = "app_document")
+@Entity
 public class AppDocument {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

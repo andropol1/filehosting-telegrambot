@@ -26,6 +26,7 @@ public class FileController {
 	}
 	@GetMapping("/get-doc")
 	public void getDoc(@RequestParam String id, HttpServletResponse response){
+		//TODO для формирования badRequest добавить ControllerAdvice
 		Optional.ofNullable(fileService.getDocument(id).get())
 				.ifPresentOrElse(doc -> {
 					response.setContentType(MediaType.parseMediaType(doc.getMimeType()).toString());

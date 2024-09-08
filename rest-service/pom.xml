@@ -14,6 +14,9 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+        <postgresql.version>42.2.18</postgresql.version>
+        <hashids.version>1.0.1</hashids.version>
+        <common.version>1.0-SNAPSHOT</common.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -29,17 +32,17 @@
         <dependency>
             <groupId>ru.andropol1</groupId>
             <artifactId>common</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${common.version}</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.18</version>
+            <version>${postgresql.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hashids</groupId>
             <artifactId>hashids</artifactId>
-            <version>1.0.1</version>
+            <version>${hashids.version}</version>
         </dependency>
     </dependencies>
 

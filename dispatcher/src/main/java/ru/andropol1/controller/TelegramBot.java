@@ -22,13 +22,10 @@ public class TelegramBot extends TelegramWebhookBot {
 	@Autowired
 	public TelegramBot(TelegramBotProperties telegramBotProperties) {
 		this.telegramBotProperties = telegramBotProperties;
-	}
-	@PostConstruct
-	public void init(){
 		try {
 			SetWebhook setWebhook = SetWebhook.builder()
-					.url(telegramBotProperties.getUri())
-					.build();
+											  .url(telegramBotProperties.getUri())
+											  .build();
 			this.setWebhook(setWebhook);
 		} catch (TelegramApiException e) {
 			log.error(e);

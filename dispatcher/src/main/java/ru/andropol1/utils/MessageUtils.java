@@ -12,13 +12,14 @@ import ru.andropol1.service.KafkaProducer;
 public class MessageUtils {
 	private final KafkaProducer kafkaProducer;
 	private final KafkaProperties kafkaProperties;
+
 	@Autowired
 	public MessageUtils(KafkaProducer kafkaProducer, KafkaProperties kafkaProperties) {
 		this.kafkaProducer = kafkaProducer;
 		this.kafkaProperties = kafkaProperties;
 	}
 
-	public SendMessage generateResponseMessage(Update update, String text){
+	public SendMessage generateResponseMessage(Update update, String text) {
 		Message message = update.getMessage();
 		SendMessage response = new SendMessage();
 		response.setChatId(message.getChatId());

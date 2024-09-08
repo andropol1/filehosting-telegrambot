@@ -14,6 +14,11 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+        <javax-mail.version>1.4</javax-mail.version>
+        <hibernate-types.version>2.2.2</hibernate-types.version>
+        <postgresql.version>42.2.18</postgresql.version>
+        <hashids.version>1.0.1</hashids.version>
+        <common.version>1.0-SNAPSHOT</common.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
@@ -46,29 +51,29 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.18</version>
+            <version>${postgresql.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.vladmihalcea</groupId>
             <artifactId>hibernate-types-52</artifactId>
-            <version>2.2.2</version>
+            <version>${hibernate-types.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hashids</groupId>
             <artifactId>hashids</artifactId>
-            <version>1.0.1</version>
+            <version>${hashids.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ru.andropol1</groupId>
             <artifactId>common</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${common.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
-            <version>1.4</version>
+            <version>${javax-mail.version}</version>
         </dependency>
 
     </dependencies>

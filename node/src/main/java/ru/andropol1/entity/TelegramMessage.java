@@ -14,9 +14,9 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "telegram_message")
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
+@Table(name = "telegram_message")
+@Entity
 public class TelegramMessage {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -40,7 +40,8 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 
 	@Autowired
 	public KafkaConsumerImpl(KafkaProperties kafkaProperties, KafkaProducer kafkaProducer,
-							 TelegramMessageRepository telegramMessageRepository, AppUserRepository appUserRepository, FileService fileService, AppUserService appUserService) {
+							 TelegramMessageRepository telegramMessageRepository, AppUserRepository appUserRepository,
+							 FileService fileService, AppUserService appUserService) {
 		this.kafkaProperties = kafkaProperties;
 		this.kafkaProducer = kafkaProducer;
 		this.telegramMessageRepository = telegramMessageRepository;
@@ -71,34 +72,6 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 		Long chatId = update.getMessage().getChatId();
 		sendAnswer(output, chatId);
 	}
-
-	private void sendAnswer(String output, Long chatId) {
-		SendMessage sendMessage = new SendMessage();
-		sendMessage.setText(output);
-		sendMessage.setChatId(chatId);
-		kafkaProducer.produce(sendMessage);
-	}
-
-	private String processServiceCommand(AppUser appUser, String cmd) {
-		if (REGISTRATION.equals(cmd)){
-			return appUserService.registerUser(appUser);
-		} else if (HELP.equals(cmd)) {
-			return "Cписок доступных команд:\n"
-					+ "/cancel - отмена выполнения текущей команды;\n"
-					+ "/registration - регистрация пользователя.";
-		} else if (START.equals(cmd)) {
-			return "Привет! Чтобы посмотреть список доступных команд введите /help";
-		} else {
-			return "Неверная команда! Чтобы посмотреть список доступных команд введите /help";
-		 }
-	}
-
-	private String cancelProcess(AppUser appUser) {
-		appUser.setUserState(BASIC_STATE);
-		appUserRepository.save(appUser);
-		return "Команда отменена!";
-	}
-
 	@Override
 	@KafkaListener(topics = "#{kafkaProperties.getDoc_message()}", groupId = "group")
 	public void consumeDocMessage(Update update) {
@@ -140,6 +113,33 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 			String error = "К сожалению, загрузка фото не удалась. Повторите попытку позже.";
 			sendAnswer(error, chatId);
 		}
+	}
+
+	private void sendAnswer(String output, Long chatId) {
+		SendMessage sendMessage = new SendMessage();
+		sendMessage.setText(output);
+		sendMessage.setChatId(chatId);
+		kafkaProducer.produceAnswerMessage(sendMessage);
+	}
+
+	private String processServiceCommand(AppUser appUser, String cmd) {
+		if (REGISTRATION.equals(cmd)){
+			return appUserService.registerUser(appUser);
+		} else if (HELP.equals(cmd)) {
+			return "Cписок доступных команд:\n"
+					+ "/cancel - отмена выполнения текущей команды;\n"
+					+ "/registration - регистрация пользователя.";
+		} else if (START.equals(cmd)) {
+			return "Привет! Чтобы посмотреть список доступных команд введите /help";
+		} else {
+			return "Неверная команда! Чтобы посмотреть список доступных команд введите /help";
+		 }
+	}
+
+	private String cancelProcess(AppUser appUser) {
+		appUser.setUserState(BASIC_STATE);
+		appUserRepository.save(appUser);
+		return "Команда отменена!";
 	}
 	private boolean isNotAllowedToSendContent(Long chatId, AppUser appUser) {
 		UserState userState = appUser.getUserState();

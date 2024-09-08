@@ -12,3 +12,6 @@ spring:
 service:
   activation:
     uri: "http://127.0.0.1:8086/user/activation?id={id}"
+
+kafka:
+  registration_message: registration_message
