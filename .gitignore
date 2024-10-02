@@ -16,6 +16,7 @@
 *.iml
 *.ipr
 *.lst
+*.iml
 
 # Package Files #
 *.jar

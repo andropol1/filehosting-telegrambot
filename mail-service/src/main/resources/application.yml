@@ -1,17 +1,17 @@
 server:
-  port: 8087
+  port: ${MAIL_SERVICE_PORT:8087}
 
 spring:
   mail:
-    host: "smtp.yandex.ru"
-    port: 465
-    protocol: "smtps"
-    username: "telegram-mail-service@yandex.ru"
-    password: "ncooyjfwvcmeckje"
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT:465}
+    protocol: ${MAIL_PROTOCOL:smtps}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
 
 service:
   activation:
-    uri: "http://127.0.0.1:8086/user/activation?id={id}"
+    uri: ${ACTIVATION_URI}
 
 kafka:
-  registration_message: registration_message
+  registration_message: ${KAFKA_REGISTRATION_MESSAGE}

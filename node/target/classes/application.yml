@@ -1,26 +1,26 @@
 server:
-  port: 8085
+  port: ${NODE_PORT:8085}
 
 kafka:
-  doc_message: "doc_message"
-  photo_message: "photo_message"
-  text_message: "text_message"
-  answer_message: "answer_message"
+  doc_message: ${KAFKA_DOC_MESSAGE}
+  photo_message: ${KAFKA_PHOTO_MESSAGE}
+  text_message: ${KAFKA_TEXT_MESSAGE}
+  answer_message: ${KAFKA_ANSWER_MESSAGE}
+  registration_message: ${KAFKA_REGISTRATION_MESSAGE}
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/test_db
-    username: postgres
-    password: postgres
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5433/test_db}
+    username: ${POSTGRES_USERNAME:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
   jpa:
     generate-ddl: true
 bot:
-  token: 7210054109:AAGGEWpCHyNBK__jnObakCQ6fpd29XGoxjM
-  file_info_uri: https://api.telegram.org/bot{token}/getFile?file_id={fileId}
-  file_storage_uri: https://api.telegram.org/file/bot{token}/{filePath}
-  linkAddress: 127.0.0.1:8086
-  mail_uri: http://127.0.0.1:8087/mail/send
+  token: ${TG_BOT_TOKEN}
+  file_info_uri: ${TG_BOT_FILE_INFO_URI}
+  file_storage_uri: ${TG_BOT_FILE_STORAGE_URI}
+  linkAddress: ${TG_BOT_URI:127.0.0.1:8086}
 
 hash:
-  salt: gKkCxjMgxK
-  minHashLength: 10
+  salt: ${SALT}
+  minHashLength: ${MIN_HASH_LENGTH:10}

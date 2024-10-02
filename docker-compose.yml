@@ -1,47 +1,188 @@
-version: "3.8"
+version: "3.9"
+
+volumes:
+  kafka-data:
+    driver: local
+  postgres-data:
+    driver: local
+
 services:
-  db:
-    image: postgres:12
+  dispatcher:
+    container_name: dispatcher
+    restart: on-failure
+    build:
+      context: ./
+      dockerfile: ./dispatcher/Dockerfile
     ports:
-      - "5432:5432"
+      - ${DISPATCHER_PORT}:${DISPATCHER_PORT}
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=test_db
+      DISPATCHER_PORT: ${DISPATCHER_PORT}
+      TG_BOT_NAME: ${TG_BOT_NAME}
+      TG_BOT_TOKEN: ${TG_BOT_TOKEN}
+      TG_BOT_URI: ${TG_BOT_URI}
+      KAFKA_TEXT_MESSAGE: ${KAFKA_TEXT_MESSAGE}
+      KAFKA_DOC_MESSAGE: ${KAFKA_DOC_MESSAGE}
+      KAFKA_PHOTO_MESSAGE: ${KAFKA_PHOTO_MESSAGE}
+      KAFKA_ANSWER_MESSAGE: ${KAFKA_ANSWER_MESSAGE}
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '3'
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  node:
+    container_name: node
+    restart: on-failure
+    build:
+      context: ./
+      dockerfile: ./node/Dockerfile
+    environment:
+      NODE_PORT: ${NODE_PORT}
+      KAFKA_TEXT_MESSAGE: ${KAFKA_TEXT_MESSAGE}
+      KAFKA_DOC_MESSAGE: ${KAFKA_DOC_MESSAGE}
+      KAFKA_PHOTO_MESSAGE: ${KAFKA_PHOTO_MESSAGE}
+      KAFKA_ANSWER_MESSAGE: ${KAFKA_ANSWER_MESSAGE}
+      KAFKA_REGISTRATION_MESSAGE: ${KAFKA_REGISTRATION_MESSAGE}
+      POSTGRES_URL: ${POSTGRES_URL}
+      POSTGRES_USERNAME: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TG_BOT_TOKEN: ${TG_BOT_TOKEN}
+      TG_BOT_FILE_INFO_URI: ${TG_BOT_FILE_INFO_URI}
+      TG_BOT_FILE_STORAGE_URI: ${TG_BOT_FILE_STORAGE_URI}
+      HOST_URL: ${HOST_URL}
+      SALT: ${SALT}
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '3'
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres-db:
+        condition: service_healthy
+
+  rest-service:
+    container_name: rest-service
+    restart: on-failure
+    build:
+      context: ./
+      dockerfile: ./rest-service/Dockerfile
+    ports:
+      - ${REST_SERVICE_PORT}:${REST_SERVICE_PORT}
+    environment:
+      REST_SERVICE_PORT: ${REST_SERVICE_PORT}
+      POSTGRES_URL: ${POSTGRES_URL}
+      POSTGRES_USERNAME: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      SALT: ${SALT}
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '3'
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+
+  mail-service:
+    container_name: mail-service
+    restart: on-failure
+    build:
+      context: ./
+      dockerfile: ./mail-service/Dockerfile
+    environment:
+      MAIL_SERVICE_PORT: ${MAIL_SERVICE_PORT}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_PROTOCOL: ${MAIL_PROTOCOL}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      KAFKA_REGISTRATION_MESSAGE: ${KAFKA_REGISTRATION_MESSAGE}
+      ACTIVATION_URI: ${ACTIVATION_URI}
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '3'
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  postgres-db:
+    container_name: postgres-db
+    hostname: postgres
+    image: postgres:14.5
+    volumes:
+      - /postgres-data:/var/lib/postgresql/data
+    ports:
+      - ${POSTGRES_PORT_MAPPING}
+    environment:
+      POSTGRES_USERNAME: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USERNAME} -d ${POSTGRES_DATABASE} -h ${HOST_URL}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
 
   zookeeper:
     image: bitnami/zookeeper:latest
-    restart: on-failure
+    restart: unless-stopped
     ports:
-      - "2181:2181"
+      - ${ZOOKEEPER_PORT}:${ZOOKEEPER_PORT}
     environment:
-      ZOO_MY_ID: 1
-      ZOO_PORT: 2181
-      ZOO_SERVERS: server.1=zookeeper:2888:3888
-      ALLOW_ANONYMOUS_LOGIN: "yes"
+      ZOO_MY_ID: ${ZOO_MY_ID}
+      ZOO_PORT: ${ZOOKEEPER_PORT}
+      ZOO_SERVERS: ${ZOO_SERVERS}
+      ALLOW_ANONYMOUS_LOGIN: ${ALLOW_ANONYMOUS_LOGIN}
+    healthcheck:
+      test: ["CMD", "echo", "ruok", "|", "nc", "${HOST_URL}", "${ZOOKEEPER_PORT}"]
+      interval: 10s
+      timeout: 10s
+      retries: 6
+      start_period: 30s
 
   kafka:
+    container_name: kafka
+    hostname: kafka
     image: bitnami/kafka:latest
-    restart: on-failure
+    restart: unless-stopped
     ports:
-      - "9092:9092"
+      - ${KAFKA_PORT}:${KAFKA_PORT}
     environment:
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: ${KAFKA_ADVERTISED_LISTENERS}
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-      KAFKA_BROKER_ID: 1
-      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
-      ALLOW_PLAINTEXT_LISTENER: "yes"
-      KAFKA_LISTENERS: "INTERNAL://:29092,EXTERNAL://:9092"
-      KAFKA_ZOOKEEPER_SESSION_TIMEOUT: "6000"
-      KAFKA_RESTART_ATTEMPTS: "10"
-      KAFKA_RESTART_DELAY: "5"
-      ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: "0"
+      KAFKA_ZOOKEEPER_CONNECT: ${KAFKA_ZOOKEEPER_CONNECT}
+      KAFKA_BROKER_ID: ${KAFKA_BROKER_ID}
+      KAFKA_LOG4J_LOGGERS: ${KAFKA_LOG4J_LOGGERS}
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: ${KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR}
+      KAFKA_CFG_ZOOKEEPER_CONNECT: ${KAFKA_ZOOKEEPER_CONNECT}
+      ALLOW_PLAINTEXT_LISTENER: ${ALLOW_PLAINTEXT_LISTENER}
+      KAFKA_LISTENERS: ${KAFKA_LISTENERS}
+      KAFKA_ZOOKEEPER_SESSION_TIMEOUT: ${KAFKA_ZOOKEEPER_SESSION_TIMEOUT}
+      KAFKA_RESTART_ATTEMPTS: ${KAFKA_RESTART_ATTEMPTS}
+      KAFKA_RESTART_DELAY: ${KAFKA_RESTART_DELAY}
+      ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: ${ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL}
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: ${KAFKA_AUTO_CREATE_TOPICS_ENABLE}
+    volumes:
+      - kafka-data:/var/lib/kafka
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--list", "--bootstrap-server", "${HOST_URL}:${KAFKA_PORT}"]
+      interval: 20s
+      timeout: 20s
+      retries: 6
+      start_period: 60s
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
 
   kowl:
     image: quay.io/cloudhut/kowl:v1.4.0
@@ -49,7 +190,8 @@ services:
     volumes:
       - ./kowl_config:/etc/kowl/
     ports:
-      - "8080:8080"
+      - ${KOWL_PORT}:${KOWL_PORT}
     entrypoint: ./kowl --config.filepath=/etc/kowl/config.yml
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy

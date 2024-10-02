@@ -1,14 +1,14 @@
 server:
-  port: 8086
+  port: ${REST_SERVICE_PORT:8086}
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/test_db
-    username: postgres
-    password: postgres
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5433/test_db}
+    username: ${POSTGRES_USERNAME:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
   jpa:
     generate-ddl: true
 
 decoder:
-  salt: gKkCxjMgxK
-  minHashLength: 10
+  salt: ${SALT}
+  minHashLength: ${MIN_HASH_LENGTH:10}

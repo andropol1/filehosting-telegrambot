@@ -1,5 +1,6 @@
 package ru.andropol1.service.impl;
 
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import ru.andropol1.dto.MailParams;
 import ru.andropol1.service.MailSenderService;
 @Service
+@Log4j
 public class MailSenderServiceImpl implements MailSenderService {
 	private final JavaMailSender javaMailSender;
 	@Value("${spring.mail.username}")
@@ -25,6 +27,7 @@ public class MailSenderServiceImpl implements MailSenderService {
 		String subject = "Активация учетной записи";
 		String body = getActivationMailBody(mailParams.getId());
 		String emailTo = mailParams.getEmailTo();
+		log.debug(String.format("Sending email for mail=[%s]", emailTo));
 		SimpleMailMessage mailMessage = new SimpleMailMessage();
 		mailMessage.setFrom(emailFrom);
 		mailMessage.setTo(emailTo);
