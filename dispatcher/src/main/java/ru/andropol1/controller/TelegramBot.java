@@ -11,13 +11,11 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.andropol1.config.TelegramBotProperties;
 
-import javax.annotation.PostConstruct;
-
 @Component
 @Log4j
 public class TelegramBot extends TelegramWebhookBot {
 
-	private TelegramBotProperties telegramBotProperties;
+	private final TelegramBotProperties telegramBotProperties;
 
 	@Autowired
 	public TelegramBot(TelegramBotProperties telegramBotProperties) {
@@ -31,6 +29,16 @@ public class TelegramBot extends TelegramWebhookBot {
 			log.error(e);
 		}
 	}
+
+	@Override
+	public String getBaseUrl() {
+		if (telegramBotProperties.getUri().contains("localhost")){
+			return telegramBotProperties.getUri();
+		} else {
+			return super.getBaseUrl();
+		}
+	}
+
 
 	@Override
 	public String getBotUsername() {

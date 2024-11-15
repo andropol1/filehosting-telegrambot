@@ -9,9 +9,9 @@ import ru.andropol1.service.KafkaProducer;
 @Service
 @Log4j
 public class KafkaProducerImpl implements KafkaProducer {
-	private final KafkaTemplate kafkaTemplate;
+	private final KafkaTemplate<String,Update> kafkaTemplate;
 
-	public KafkaProducerImpl(KafkaTemplate kafkaTemplate) {
+	public KafkaProducerImpl(KafkaTemplate<String,Update> kafkaTemplate) {
 		this.kafkaTemplate = kafkaTemplate;
 	}
 

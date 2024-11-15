@@ -20,7 +20,7 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 	}
 
 	@Override
-	@KafkaListener(topics = "#{kafkaProperties.getAnswer_message()}", groupId = "group")
+	@KafkaListener(topics = "#{kafkaProperties.getAnswer_message()}", groupId = "telegram")
 	public void consume(SendMessage sendMessage) {
 		telegramBot.sendAnswerMessage(sendMessage);
 	}

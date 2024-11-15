@@ -6,20 +6,27 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.andropol1.config.KafkaProperties;
 import ru.andropol1.controller.TelegramBot;
+import ru.andropol1.service.KafkaProducer;
 import ru.andropol1.service.UpdateService;
 import ru.andropol1.utils.MessageUtils;
 
 @Service
 @Log4j
 public class UpdateServiceImpl implements UpdateService {
-	private final MessageUtils messageUtils;
 	private final TelegramBot telegramBot;
+	private final KafkaProducer kafkaProducer;
+	private final KafkaProperties kafkaProperties;
+	private final MessageUtils messageUtils;
 	@Autowired
 
-	public UpdateServiceImpl(MessageUtils messageUtils, TelegramBot telegramBot) {
-		this.messageUtils = messageUtils;
+	public UpdateServiceImpl(TelegramBot telegramBot, KafkaProducer kafkaProducer, KafkaProperties kafkaProperties,
+							 MessageUtils messageUtils) {
 		this.telegramBot = telegramBot;
+		this.kafkaProducer = kafkaProducer;
+		this.kafkaProperties = kafkaProperties;
+		this.messageUtils = messageUtils;
 	}
 
 	@Override
@@ -37,13 +44,13 @@ public class UpdateServiceImpl implements UpdateService {
 	private void filterMessagesByContent(Update update) {
 		Message message = update.getMessage();
 		if (message.hasText()){
-			messageUtils.processTextMessage(update);
+			kafkaProducer.produce(kafkaProperties.getText_message(), update);
 		} else if (message.hasDocument()) {
 			setFileIsReceived(update);
-			messageUtils.processDocMessage(update);
+			kafkaProducer.produce(kafkaProperties.getDoc_message(), update);
 		} else if (message.hasPhoto()) {
 			setFileIsReceived(update);
-			messageUtils.processPhotoMessage(update);
+			kafkaProducer.produce(kafkaProperties.getPhoto_message(), update);
 		} else {
 			setUnsupportedMessage(update);
 		}

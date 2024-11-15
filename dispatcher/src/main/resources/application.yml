@@ -6,10 +6,10 @@ server:
 bot:
   name: ${TG_BOT_NAME:file_hosting_telegram_bot}
   token: ${TG_BOT_TOKEN:7210054109:AAGGEWpCHyNBK__jnObakCQ6fpd29XGoxjM}
-  uri: ${TG_BOT_URI:https://bea6-178-65-130-12.ngrok-free.app}
-
-kafka:
-  doc_message: ${KAFKA_DOC_MESSAGE}
-  photo_message: ${KAFKA_PHOTO_MESSAGE}
-  text_message: ${KAFKA_TEXT_MESSAGE}
-  answer_message: ${KAFKA_ANSWER_MESSAGE}
+  uri: ${TG_BOT_URI:https://de7e-178-65-130-12.ngrok-free.app}
+spring:
+  kafka:
+    doc_message: ${KAFKA_DOC_MESSAGE}
+    photo_message: ${KAFKA_PHOTO_MESSAGE}
+    text_message: ${KAFKA_TEXT_MESSAGE:text_message}
+    answer_message: ${KAFKA_ANSWER_MESSAGE:answer_message}

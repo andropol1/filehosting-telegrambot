@@ -1,5 +1,10 @@
 # Compiled class file
 *.class
+dispatcher/target
+common/target
+mail-service/target
+node/target
+rest-service/target
 
 # Log file
 *.log

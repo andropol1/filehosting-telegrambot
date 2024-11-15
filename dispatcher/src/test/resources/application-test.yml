@@ -1,0 +1,23 @@
+bot:
+  name: ${TG_BOT_NAME:file_hosting_telegram_bot}
+  token: ${TG_BOT_TOKEN:7210054109:AAGGEWpCHyNBK__jnObakCQ6fpd29XGoxjM}
+  uri: http://localhost:54321/
+spring:
+  kafka:
+    doc_message: ${KAFKA_DOC_MESSAGE}
+    photo_message: ${KAFKA_PHOTO_MESSAGE}
+    text_message: ${KAFKA_TEXT_MESSAGE:text_message}
+    answer_message: ${KAFKA_ANSWER_MESSAGE:answer_message}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      group-id: telegram
+      auto-offset-reset: earliest
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: org.telegram.telegrambots.meta.api.methods.send
