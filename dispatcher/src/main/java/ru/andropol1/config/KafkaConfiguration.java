@@ -10,8 +10,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.support.converter.StringJsonMessageConverter;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.HashMap;
@@ -39,24 +41,25 @@ public class KafkaConfiguration {
 	}
 
 	@Bean
-	public ConsumerFactory<String, Update> consumerFactory() {
+	public ConsumerFactory<String, SendMessage> consumerFactory() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
 		props.put(ConsumerConfig.GROUP_ID_CONFIG, "telegram");
 		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+		props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class.getName());
 		props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+		props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "org.telegram.telegrambots.meta.api.methods.send.SendMessage");
 
-		DefaultKafkaConsumerFactory<String, Update> factory = new DefaultKafkaConsumerFactory<>(props);
+		DefaultKafkaConsumerFactory<String, SendMessage> factory = new DefaultKafkaConsumerFactory<>(props);
 		return factory;
 	}
 
 	@Bean
-	public ConcurrentKafkaListenerContainerFactory<String, Update> kafkaListenerContainerFactory() {
-		ConcurrentKafkaListenerContainerFactory<String, Update> factory =
+	public ConcurrentKafkaListenerContainerFactory<String, SendMessage> kafkaListenerContainerFactory() {
+		ConcurrentKafkaListenerContainerFactory<String, SendMessage> factory =
 				new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(consumerFactory());
-		factory.setMessageConverter(new StringJsonMessageConverter());
 		return factory;
 	}
 

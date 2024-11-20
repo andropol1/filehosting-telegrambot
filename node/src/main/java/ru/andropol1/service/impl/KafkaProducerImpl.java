@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.andropol1.config.KafkaProperties;
 import ru.andropol1.dto.MailParams;
 import ru.andropol1.service.KafkaProducer;
@@ -12,10 +13,10 @@ import ru.andropol1.service.KafkaProducer;
 @Service
 @Log4j
 public class KafkaProducerImpl implements KafkaProducer {
-	private final KafkaTemplate kafkaTemplate;
+	private final KafkaTemplate<String, Object> kafkaTemplate;
 	private final KafkaProperties kafkaProperties;
 	@Autowired
-	public KafkaProducerImpl(KafkaTemplate kafkaTemplate, KafkaProperties kafkaProperties) {
+	public KafkaProducerImpl(KafkaTemplate<String, Object> kafkaTemplate, KafkaProperties kafkaProperties) {
 		this.kafkaTemplate = kafkaTemplate;
 		this.kafkaProperties = kafkaProperties;
 	}

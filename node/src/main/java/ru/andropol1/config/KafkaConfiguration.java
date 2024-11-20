@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.support.converter.StringJsonMessageConverter;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -23,7 +25,10 @@ public class KafkaConfiguration {
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
 		props.put(ConsumerConfig.GROUP_ID_CONFIG, "telegram");
 		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+		props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class.getName());
+		props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+		props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "org.telegram.telegrambots.meta.api.objects.Update");
 
 		DefaultKafkaConsumerFactory<String, Update> factory = new DefaultKafkaConsumerFactory<>(props);
 		return factory;
@@ -34,16 +39,15 @@ public class KafkaConfiguration {
 		ConcurrentKafkaListenerContainerFactory<String, Update> factory =
 				new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(consumerFactory());
-		factory.setMessageConverter(new StringJsonMessageConverter());
 		return factory;
 	}
 
 	@Bean
-	public KafkaTemplate<String, Update> kafkaTemplate() {
+	public KafkaTemplate<String, Object> kafkaTemplate() {
 		return new KafkaTemplate<>(producerFactory());
 	}
 	@Bean
-	public ProducerFactory<String, Update> producerFactory() {
+	public ProducerFactory<String, Object> producerFactory() {
 		Map<String, Object> configProps = new HashMap<>();
 		configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
 		configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
