@@ -4,6 +4,8 @@ import lombok.extern.log4j.Log4j;
 import org.hashids.Hashids;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 import ru.andropol1.dto.MailParams;
 import ru.andropol1.entity.AppUser;
 import ru.andropol1.repository.AppUserRepository;
@@ -67,6 +69,24 @@ public class AppUserServiceImpl implements AppUserService {
 			return "Этот email уже используется. Введите корректный email."
 					+ " Для отмены команды введите /cancel";
 		}
+	}
+
+	@Override
+	public AppUser findOrSaveAppUser(Update update) {
+		User user = update.getMessage().getFrom();
+		Optional<AppUser> persistentUser = appUserRepository.findByTelegramUserId(user.getId());
+		if (persistentUser.isEmpty()){
+			AppUser transientUser = AppUser.builder()
+										   .telegramUserId(user.getId())
+										   .userName(user.getUserName())
+										   .firstName(user.getFirstName())
+										   .lastName(user.getLastName())
+										   .isActive(false)
+										   .userState(BASIC_STATE)
+										   .build();
+			return appUserRepository.save(transientUser);
+		}
+		return persistentUser.get();
 	}
 
 	private void sendRequestToMailService(String hashId, String email) {
