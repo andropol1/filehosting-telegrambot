@@ -22,6 +22,7 @@ import ru.andropol1.repository.AppPhotoRepository;
 import ru.andropol1.repository.BinaryContentRepository;
 import ru.andropol1.service.FileService;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -37,6 +38,7 @@ public class FileServiceImpl implements FileService {
 	private final BotProperties botProperties;
 	private final WebClient webClient;
 	private final Hashids hashids;
+
 	@Autowired
 	public FileServiceImpl(AppDocumentRepository appDocumentRepository, AppPhotoRepository appPhotoRepository,
 						   BinaryContentRepository binaryContentRepository,
@@ -52,9 +54,10 @@ public class FileServiceImpl implements FileService {
 	@Override
 	public AppDocument processDoc(Message message) {
 		Document document = message.getDocument();
-		String fileId = message.getDocument().getFileId();
+		String fileId = message.getDocument()
+							   .getFileId();
 		ResponseEntity<String> response = getFilePath(fileId);
-		if (response.getStatusCode() == HttpStatus.OK){
+		if (response.getStatusCode() == HttpStatus.OK) {
 			BinaryContent persistentBinaryContent = getPersistentBinaryContent(response);
 			AppDocument transientAppDoc = buildTransientAppDoc(document, persistentBinaryContent);
 			return appDocumentRepository.save(transientAppDoc);
@@ -65,12 +68,15 @@ public class FileServiceImpl implements FileService {
 
 	@Override
 	public AppPhoto processPhoto(Message message) {
-		int photoSize = message.getPhoto().size();
-		int photoIndex = photoSize > 1 ? message.getPhoto().size() - 1 : 0;
-		PhotoSize photo = message.getPhoto().get(photoIndex);
+		int photoSize = message.getPhoto()
+							   .size();
+		int photoIndex = photoSize > 1 ? message.getPhoto()
+												.size() - 1 : 0;
+		PhotoSize photo = message.getPhoto()
+								 .get(photoIndex);
 		String fileId = photo.getFileId();
 		ResponseEntity<String> response = getFilePath(fileId);
-		if (response.getStatusCode() == HttpStatus.OK){
+		if (response.getStatusCode() == HttpStatus.OK) {
 			BinaryContent persistentBinaryContent = getPersistentBinaryContent(response);
 			AppPhoto transientAppPhoto = buildTransientAppPhoto(photo, persistentBinaryContent);
 			return appPhotoRepository.save(transientAppPhoto);
@@ -87,54 +93,65 @@ public class FileServiceImpl implements FileService {
 
 	private AppPhoto buildTransientAppPhoto(PhotoSize photo, BinaryContent persistentBinaryContent) {
 		return AppPhoto.builder()
-				.telegramFileId(photo.getFileId())
-				.binaryContent(persistentBinaryContent)
-				.fileSize(photo.getFileSize())
-				.build();
+					   .telegramFileId(photo.getFileId())
+					   .binaryContent(persistentBinaryContent)
+					   .fileSize(photo.getFileSize())
+					   .build();
 	}
 
-	private BinaryContent getPersistentBinaryContent(ResponseEntity<String> response){
+	private BinaryContent getPersistentBinaryContent(ResponseEntity<String> response) {
 		JSONObject jsonObject = new JSONObject(Objects.requireNonNull(response.getBody()));
-		String filePath = jsonObject.getJSONObject("result").getString("file_path");
+		String filePath = jsonObject.getJSONObject("result")
+									.getString("file_path");
 		byte[] fileInByte = downloadFile(filePath);
 		BinaryContent transientBinaryContent = BinaryContent.builder()
-				.fileAsArrayOfBytes(fileInByte)
-				.build();
+															.fileAsArrayOfBytes(fileInByte)
+															.build();
 		return binaryContentRepository.save(transientBinaryContent);
 
 	}
 
 	private AppDocument buildTransientAppDoc(Document document, BinaryContent persistentBinaryContent) {
 		return AppDocument.builder().
-				telegramFileId(document.getFileId())
-				.docName(document.getFileName())
-				.binaryContent(persistentBinaryContent)
-				.mimeType(document.getMimeType())
-				.fileSize(document.getFileSize())
-				.build();
+						  telegramFileId(document.getFileId())
+						  .docName(document.getFileName())
+						  .binaryContent(persistentBinaryContent)
+						  .mimeType(document.getMimeType())
+						  .fileSize(document.getFileSize())
+						  .build();
 	}
 
 	private byte[] downloadFile(String filePath) {
-		String fullURI = botProperties.getFile_storage_uri().replace("{token}", botProperties.getToken())
-				.replace("{filePath}", filePath);
+		String fullURI = botProperties.getFile_storage_uri()
+									  .replace("{token}", botProperties.getToken())
+									  .replace("{filePath}", filePath);
 		URL urlObj = null;
-		try{
+		try {
 			urlObj = new URL(fullURI);
 		} catch (MalformedURLException e) {
 			throw new UploadFileException(e);
 		}
-		try(InputStream inputStream = urlObj.openStream()){
-			return inputStream.readAllBytes();
+		final int BUFFER_SIZE = 4096;
+
+		try (InputStream inputStream = urlObj.openStream();
+			 ByteArrayOutputStream outputStream  = new ByteArrayOutputStream()) {
+			byte[] buffer = new byte[BUFFER_SIZE];
+			int bytesRead;
+			while ((bytesRead = inputStream.read(buffer, 0, BUFFER_SIZE)) != -1){
+				outputStream.write(buffer,0, bytesRead);
+			}
+			return outputStream.toByteArray();
 		} catch (IOException e) {
 			throw new UploadFileException(urlObj.toExternalForm(), e);
 		}
 	}
 
 	private ResponseEntity<String> getFilePath(String fileId) {
-		return 	webClient
+		return webClient
 				.get()
-				.uri(botProperties.getFile_info_uri().replace("{token}", botProperties.getToken())
-						.replace("{fileId}", fileId))
+				.uri(botProperties.getFile_info_uri()
+								  .replace("{token}", botProperties.getToken())
+								  .replace("{fileId}", fileId))
 				.retrieve()
 				.toEntity(String.class)
 				.block();
