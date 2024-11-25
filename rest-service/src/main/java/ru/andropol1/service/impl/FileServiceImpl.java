@@ -26,13 +26,13 @@ public class FileServiceImpl implements FileService {
 
 	@Override
 	public Optional<AppDocument> getDocument(String hash) {
-		Long id = decoder.idOf(hash);
-		return appDocumentRepository.findById(id);
+		return Optional.ofNullable(decoder.idOf(hash))
+				.flatMap(appDocumentRepository::findById);
 	}
 
 	@Override
 	public Optional<AppPhoto> getPhoto(String hash) {
-		Long id = decoder.idOf(hash);
-		return appPhotoRepository.findById(id);
+		return Optional.ofNullable(decoder.idOf(hash))
+					   .flatMap(appPhotoRepository::findById);
 	}
 }
