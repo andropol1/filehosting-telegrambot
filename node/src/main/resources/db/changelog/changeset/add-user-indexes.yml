@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-user-indexes
+      author: Andropol1
+      changes:
+        - addUniqueConstraint:
+            columnNames: telegram_user_id
+            tableName: app_user
+            constraintName: uq_app_user_telegram_user_id
+        - addUniqueConstraint:
+            columnNames: email
+            tableName: app_user
+            constraintName: uq_app_user_email

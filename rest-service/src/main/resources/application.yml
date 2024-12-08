@@ -6,8 +6,6 @@ spring:
     url: ${POSTGRES_URL:jdbc:postgresql://localhost:5433/test_db}
     username: ${POSTGRES_USERNAME:postgres}
     password: ${POSTGRES_PASSWORD:postgres}
-  jpa:
-    generate-ddl: true
 
 decoder:
   salt: ${SALT}

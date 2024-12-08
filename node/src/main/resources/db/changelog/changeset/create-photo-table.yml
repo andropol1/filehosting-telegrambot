@@ -1,0 +1,34 @@
+databaseChangeLog:
+  -  changeSet:
+       id:  create-photo-table
+       author:  Andropol1
+       changes:
+         -  createTable:
+              tableName:  app_photo
+              columns:
+                - column:
+                    name: id
+                    type: bigint
+                    autoIncrement: true
+                    constraints:
+                      primaryKey: true
+                      nullable: false
+                - column:
+                    name: telegram_file_id
+                    type: varchar(255)
+                    constraints:
+                      nullable: false
+                - column:
+                    name: binary_content_id
+                    type: bigint
+                    constraints:
+                      nullable: false
+                - column:
+                    name: file_size
+                    type: bigint
+         - addForeignKeyConstraint:
+             baseTableName: app_photo
+             baseColumnNames: binary_content_id
+             constraintName: fk_app_photo_binary_content
+             referencedTableName: binary_content
+             referencedColumnNames: id

@@ -1,0 +1,40 @@
+databaseChangeLog:
+  -  changeSet:
+       id:  create-doc-table
+       author:  Andropol1
+       changes:
+         -  createTable:
+              tableName:  app_document
+              columns:
+                - column:
+                    name: id
+                    type: bigint
+                    autoIncrement: true
+                    constraints:
+                      primaryKey: true
+                      nullable: false
+                - column:
+                    name: telegram_file_id
+                    type: varchar(255)
+                    constraints:
+                      nullable: false
+                - column:
+                    name: doc_name
+                    type: varchar(255)
+                - column:
+                    name: binary_content_id
+                    type: bigint
+                    constraints:
+                      nullable: false
+                - column:
+                    name: mime_type
+                    type: varchar(255)
+                - column:
+                    name: file_size
+                    type: bigint
+         - addForeignKeyConstraint:
+             baseTableName: app_document
+             baseColumnNames: binary_content_id
+             constraintName: fk_app_document_binary_content
+             referencedTableName: binary_content
+             referencedColumnNames: id

@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-message-table
+      author: Andropol1
+      changes:
+        - createTable:
+            tableName: telegram_message
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: update
+                  type: jsonb
+                  constraints:
+                    nullable: false

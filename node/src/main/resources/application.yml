@@ -13,8 +13,10 @@ spring:
     url: ${POSTGRES_URL:jdbc:postgresql://localhost:5433/test_db}
     username: ${POSTGRES_USERNAME:postgres}
     password: ${POSTGRES_PASSWORD:postgres}
-  jpa:
-    generate-ddl: true
+  liquibase:
+    change-log: ${CHANGE_LOG:classpath:db/changelog/master.yml}
+    enabled: true
+
 bot:
   token: ${TG_BOT_TOKEN}
   file_info_uri: ${TG_BOT_FILE_INFO_URI}

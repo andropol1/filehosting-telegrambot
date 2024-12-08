@@ -4,6 +4,7 @@ import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.andropol1.config.KafkaProperties;
 import ru.andropol1.entity.AppDocument;
@@ -39,6 +40,7 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 
 	@Override
 	@KafkaListener(topics = "#{kafkaProperties.getText_message()}", groupId = "group")
+	@Transactional
 	public void consumeTextMessage(Update update) {
 		log.debug("consumeTextMessage");
 		coreService.saveUpdate(update);
@@ -61,6 +63,7 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 	}
 	@Override
 	@KafkaListener(topics = "#{kafkaProperties.getDoc_message()}", groupId = "group")
+	@Transactional
 	public void consumeDocMessage(Update update) {
 		log.debug("consumeDocMessage");
 		coreService.saveUpdate(update);
@@ -82,6 +85,7 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 	}
 	@Override
 	@KafkaListener(topics = "#{kafkaProperties.getPhoto_message()}", groupId = "group")
+	@Transactional
 	public void consumePhotoMessage(Update update) {
 		log.debug("consumePhotoMessage");
 		coreService.saveUpdate(update);

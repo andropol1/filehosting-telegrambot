@@ -1,0 +1,41 @@
+databaseChangeLog:
+  -  changeSet:
+       id:  create-user-table
+       author:  Andropol1
+       changes:
+         -  createTable:
+              tableName:  app_user
+              columns:
+                - column:
+                    name: id
+                    type: bigint
+                    autoIncrement: true
+                    constraints:
+                      primaryKey: true
+                      nullable: false
+                - column:
+                    name: telegram_user_id
+                    type: bigint
+                - column:
+                    name: first_login_date
+                    type: timestamp
+                    constraints:
+                      nullable: false
+                - column:
+                    name: first_name
+                    type: varchar(255)
+                - column:
+                    name: last_name
+                    type: varchar(255)
+                - column:
+                    name: user_name
+                    type: varchar(255)
+                - column:
+                    name: email
+                    type: varchar(255)
+                - column:
+                    name: is_active
+                    type: boolean
+                - column:
+                    name: user_state
+                    type: varchar(255)
