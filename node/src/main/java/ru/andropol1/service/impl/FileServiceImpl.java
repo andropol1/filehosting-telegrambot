@@ -131,10 +131,9 @@ public class FileServiceImpl implements FileService {
 		} catch (MalformedURLException e) {
 			throw new UploadFileException(e);
 		}
-		final int BUFFER_SIZE = 4096;
-
 		try (InputStream inputStream = urlObj.openStream();
 			 ByteArrayOutputStream outputStream  = new ByteArrayOutputStream()) {
+			final int BUFFER_SIZE = 16384;
 			byte[] buffer = new byte[BUFFER_SIZE];
 			int bytesRead;
 			while ((bytesRead = inputStream.read(buffer, 0, BUFFER_SIZE)) != -1){

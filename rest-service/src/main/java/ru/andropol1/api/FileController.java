@@ -12,9 +12,7 @@ import ru.andropol1.exceptions.ResourceNotFoundException;
 import ru.andropol1.service.FileService;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.util.Optional;
 
 @Log4j
@@ -38,8 +36,15 @@ public class FileController {
 									   "attachment; filename:=" + doc.getDocName());
 							   response.setStatus(HttpServletResponse.SC_OK);
 							   BinaryContent binaryContent = doc.getBinaryContent();
-							   try (OutputStream out = response.getOutputStream()) {
-								   out.write(binaryContent.getFileAsArrayOfBytes());
+							   try (InputStream in = new ByteArrayInputStream(binaryContent.getFileAsArrayOfBytes());
+									OutputStream out = response.getOutputStream()) {
+								   final int BUFFER_SIZE = 16384;
+								   byte[] buffer = new byte[BUFFER_SIZE];
+								   int bytesRead;
+								   while((bytesRead = in.read(buffer)) != -1){
+									   out.write(buffer, 0, bytesRead);
+									   out.flush();
+								   }
 							   } catch (IOException e) {
 								   throw new UncheckedIOException(e);
 							   }
@@ -58,8 +63,15 @@ public class FileController {
 							   response.setHeader("Content-disposition", "attachment;");
 							   response.setStatus(HttpServletResponse.SC_OK);
 							   BinaryContent binaryContent = photo.getBinaryContent();
-							   try (OutputStream out = response.getOutputStream()) {
-								   out.write(binaryContent.getFileAsArrayOfBytes());
+							   try (InputStream in = new ByteArrayInputStream(binaryContent.getFileAsArrayOfBytes());
+									OutputStream out = response.getOutputStream()) {
+								   final int BUFFER_SIZE = 16384;
+								   byte[] buffer = new byte[BUFFER_SIZE];
+								   int bytesRead;
+								   while((bytesRead = in.read()) != -1){
+									   out.write(buffer, 0, bytesRead);
+									   out.flush();
+								   }
 							   } catch (IOException e) {
 								   throw new UncheckedIOException(e);
 							   }
