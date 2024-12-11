@@ -20,7 +20,7 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 	}
 
 	@Override
-	@KafkaListener(topics = "#{kafkaProperties.getRegistration_message()}", groupId = "group")
+	@KafkaListener(topics = "#{kafkaProperties.getRegistration_message()}", groupId = "telegram")
 	public void consume(MailParams mailParams) {
 		mailSenderService.send(mailParams);
 	}

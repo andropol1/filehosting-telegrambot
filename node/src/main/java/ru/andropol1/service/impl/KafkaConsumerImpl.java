@@ -39,7 +39,7 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 	}
 
 	@Override
-	@KafkaListener(topics = "#{kafkaProperties.getText_message()}", groupId = "group")
+	@KafkaListener(topics = "#{kafkaProperties.getText_message()}", groupId = "telegram")
 	@Transactional
 	public void consumeTextMessage(Update update) {
 		log.debug("consumeTextMessage");
@@ -62,7 +62,7 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 		coreService.sendAnswer(output, chatId);
 	}
 	@Override
-	@KafkaListener(topics = "#{kafkaProperties.getDoc_message()}", groupId = "group")
+	@KafkaListener(topics = "#{kafkaProperties.getDoc_message()}", groupId = "telegram")
 	@Transactional
 	public void consumeDocMessage(Update update) {
 		log.debug("consumeDocMessage");
@@ -84,7 +84,7 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 		}
 	}
 	@Override
-	@KafkaListener(topics = "#{kafkaProperties.getPhoto_message()}", groupId = "group")
+	@KafkaListener(topics = "#{kafkaProperties.getPhoto_message()}", groupId = "telegram")
 	@Transactional
 	public void consumePhotoMessage(Update update) {
 		log.debug("consumePhotoMessage");

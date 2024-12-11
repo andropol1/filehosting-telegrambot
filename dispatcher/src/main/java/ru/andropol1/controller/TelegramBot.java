@@ -60,12 +60,12 @@ public class TelegramBot extends TelegramWebhookBot {
 	}
 
 	public void sendAnswerMessage(SendMessage sendMessage) {
-		if (sendMessage != null) {
-			try {
-				execute(sendMessage);
-			} catch (TelegramApiException e) {
-				log.error(e.getMessage());
-			}
-		}
+//		if (sendMessage != null) {
+//			try {
+//				execute(sendMessage);
+//			} catch (TelegramApiException e) {
+//				log.error(e.getMessage());
+//			}
+//		}
 	}
 }

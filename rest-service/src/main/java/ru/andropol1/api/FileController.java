@@ -35,8 +35,7 @@ public class FileController {
 							   response.setHeader("Content-disposition",
 									   "attachment; filename:=" + doc.getDocName());
 							   response.setStatus(HttpServletResponse.SC_OK);
-							   BinaryContent binaryContent = doc.getBinaryContent();
-							   try (InputStream in = new ByteArrayInputStream(binaryContent.getFileAsArrayOfBytes());
+							   try (InputStream in = doc.getInputStream();
 									OutputStream out = response.getOutputStream()) {
 								   final int BUFFER_SIZE = 16384;
 								   byte[] buffer = new byte[BUFFER_SIZE];
@@ -62,13 +61,12 @@ public class FileController {
 							   response.setContentType(MediaType.IMAGE_JPEG.toString());
 							   response.setHeader("Content-disposition", "attachment;");
 							   response.setStatus(HttpServletResponse.SC_OK);
-							   BinaryContent binaryContent = photo.getBinaryContent();
-							   try (InputStream in = new ByteArrayInputStream(binaryContent.getFileAsArrayOfBytes());
+							   try (InputStream in = photo.getInputStream();
 									OutputStream out = response.getOutputStream()) {
 								   final int BUFFER_SIZE = 16384;
 								   byte[] buffer = new byte[BUFFER_SIZE];
 								   int bytesRead;
-								   while((bytesRead = in.read()) != -1){
+								   while((bytesRead = in.read(buffer)) != -1){
 									   out.write(buffer, 0, bytesRead);
 									   out.flush();
 								   }

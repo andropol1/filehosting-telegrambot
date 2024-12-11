@@ -5,9 +5,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.w3c.dom.ls.LSOutput;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.Arrays;
 
 @Log4j
 @RestControllerAdvice
@@ -26,6 +28,8 @@ public class GlobalExceptionHandler {
 	}
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<String> handleGeneralException(Exception ex){
+		log.error(ex.getMessage());
+		log.error(Arrays.toString(ex.getStackTrace()));
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 				.body("An unexpected error occurred");
 	}
