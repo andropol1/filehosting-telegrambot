@@ -46,14 +46,14 @@ public class KafkaConsumerImpl implements KafkaConsumer {
 		coreService.saveUpdate(update);
 		AppUser appUser =  appUserService.findOrSaveAppUser(update);
 		UserState userState = appUser.getUserState();
-		String cmd = update.getMessage().getText();
+		String text = update.getMessage().getText();
 		String output = "";
-		if (CANCEL.equals(cmd)){
+		if (CANCEL.equals(text)){
 			output = coreService.cancelProcess(appUser);
 		} else if (BASIC_STATE.equals(userState)) {
-			output = coreService.processServiceCommand(appUser, cmd);
+			output = coreService.processServiceCommand(appUser, text);
 		} else if (WAIT_FOR_EMAIL_STATE.equals(userState)) {
-			output = appUserService.setEmail(appUser, cmd);
+			output = appUserService.setEmail(appUser, text);
 		} else {
 			log.error("Unknown user state: " + userState);
 			output = "Неизвестная ошибка! Введите /cancel и попробуйте снова!";

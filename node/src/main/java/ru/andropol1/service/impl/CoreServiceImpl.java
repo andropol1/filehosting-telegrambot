@@ -24,7 +24,8 @@ public class CoreServiceImpl implements CoreService {
 	private final TelegramMessageRepository telegramMessageRepository;
 
 	@Autowired
-	public CoreServiceImpl(KafkaProducerImpl kafkaProducer, AppUserServiceImpl appUserService, AppUserRepository appUserRepository, TelegramMessageRepository telegramMessageRepository) {
+	public CoreServiceImpl(KafkaProducerImpl kafkaProducer, AppUserServiceImpl appUserService,
+						   AppUserRepository appUserRepository, TelegramMessageRepository telegramMessageRepository) {
 		this.kafkaProducer = kafkaProducer;
 		this.appUserService = appUserService;
 		this.appUserRepository = appUserRepository;
@@ -46,9 +47,12 @@ public class CoreServiceImpl implements CoreService {
 		} else if (HELP.equals(cmd)) {
 			return "Cписок доступных команд:\n"
 					+ "/cancel - отмена выполнения текущей команды;\n"
-					+ "/registration - регистрация пользователя.";
+					+ "/registration - регистрация пользователя.\n"
+					+ "/reset - смена email";
 		} else if (START.equals(cmd)) {
 			return "Привет! Чтобы посмотреть список доступных команд введите /help";
+		} else if (RESET.equals(cmd)){
+			return appUserService.resetEmail(appUser);
 		} else {
 			return "Неверная команда! Чтобы посмотреть список доступных команд введите /help";
 		}

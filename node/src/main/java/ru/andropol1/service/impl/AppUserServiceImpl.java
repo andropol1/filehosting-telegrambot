@@ -35,11 +35,12 @@ public class AppUserServiceImpl implements AppUserService {
 
 	@Override
 	public String registerUser(AppUser appUser) {
-		if (appUser.getIsActive()){
+		if (appUser.getIsActive()) {
 			return "Вы уже зарегистрированы!";
-		} else if (appUser.getEmail() != null){
+		} else if (appUser.getEmail() != null) {
 			return "Вам на почту уже было отправлено письмо. "
-					+ "Перейдите по ссылке в письме для подтверждения регистрации.";
+					+ "Перейдите по ссылке в письме для подтверждения регистрации."
+					+ "Если вы ввели неверный email, то введите команду /reset";
 		}
 		appUser.setUserState(WAIT_FOR_EMAIL_STATE);
 		appUserRepository.save(appUser);
@@ -48,7 +49,7 @@ public class AppUserServiceImpl implements AppUserService {
 
 	@Override
 	public String setEmail(AppUser appUser, String email) {
-		try{
+		try {
 			InternetAddress emailAddr = new InternetAddress(email);
 			emailAddr.validate();
 
@@ -56,7 +57,7 @@ public class AppUserServiceImpl implements AppUserService {
 			return "Введите, пожалуйста, корректный email. Для отмены команды введите /cancel";
 		}
 		Optional<AppUser> optionalAppUser = appUserRepository.findByEmail(email);
-		if (optionalAppUser.isEmpty()){
+		if (optionalAppUser.isEmpty()) {
 			appUser.setEmail(email);
 			appUser.setUserState(BASIC_STATE);
 			appUserRepository.save(appUser);
@@ -64,7 +65,7 @@ public class AppUserServiceImpl implements AppUserService {
 			sendRequestToMailService(hashId, email);
 			//TODO Добавить проверку получения mail-service сообщения
 			return "Вам на почту было отправлено письмо."
-						+ "Перейдите по ссылке в письме для подтверждения регистрации.";
+					+ "Перейдите по ссылке в письме для подтверждения регистрации.";
 		} else {
 			return "Этот email уже используется. Введите корректный email."
 					+ " Для отмены команды введите /cancel";
@@ -73,9 +74,10 @@ public class AppUserServiceImpl implements AppUserService {
 
 	@Override
 	public AppUser findOrSaveAppUser(Update update) {
-		User user = update.getMessage().getFrom();
+		User user = update.getMessage()
+						  .getFrom();
 		Optional<AppUser> persistentUser = appUserRepository.findByTelegramUserId(user.getId());
-		if (persistentUser.isEmpty()){
+		if (persistentUser.isEmpty()) {
 			AppUser transientUser = AppUser.builder()
 										   .telegramUserId(user.getId())
 										   .userName(user.getUserName())
@@ -89,11 +91,18 @@ public class AppUserServiceImpl implements AppUserService {
 		return persistentUser.get();
 	}
 
+	@Override
+	public String resetEmail(AppUser appUser) {
+		appUser.setUserState(WAIT_FOR_EMAIL_STATE);
+		appUserRepository.save(appUser);
+		return "Введите новый email: ";
+	}
+
 	private void sendRequestToMailService(String hashId, String email) {
 		MailParams mailParams = MailParams.builder()
-				.id(hashId)
-				.emailTo(email)
-				.build();
+										  .id(hashId)
+										  .emailTo(email)
+										  .build();
 		kafkaProducer.produceRegistrationMessage(mailParams);
 	}
 }
