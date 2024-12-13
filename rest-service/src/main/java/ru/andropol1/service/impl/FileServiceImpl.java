@@ -21,7 +21,8 @@ public class FileServiceImpl implements FileService {
 	private final AppPhotoRepository appPhotoRepository;
 	private final Decoder decoder;
 	@Autowired
-	public FileServiceImpl(AppDocumentRepository appDocumentRepository, AppPhotoRepository appPhotoRepository, Decoder decoder) {
+	public FileServiceImpl(AppDocumentRepository appDocumentRepository,
+						   AppPhotoRepository appPhotoRepository, Decoder decoder) {
 		this.appDocumentRepository = appDocumentRepository;
 		this.appPhotoRepository = appPhotoRepository;
 		this.decoder = decoder;
