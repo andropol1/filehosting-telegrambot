@@ -17,7 +17,7 @@ import java.util.Optional;
 
 @Log4j
 @RestController
-@RequestMapping("/file")
+@RequestMapping("/api")
 public class FileController {
 	private final FileService fileService;
 
@@ -26,7 +26,7 @@ public class FileController {
 		this.fileService = fileService;
 	}
 
-	@GetMapping("/get-doc")
+	@GetMapping("/file/get-doc")
 	public void getDoc(@RequestParam String id, HttpServletResponse response) {
 		fileService.getDocument(id)
 				   .ifPresentOrElse(doc -> {
@@ -54,7 +54,7 @@ public class FileController {
 
 	}
 
-	@GetMapping("/get-photo")
+	@GetMapping("/file/get-photo")
 	public void getPhoto(@RequestParam String id, HttpServletResponse response) {
 		fileService.getPhoto(id)
 				   .ifPresentOrElse(photo  -> {

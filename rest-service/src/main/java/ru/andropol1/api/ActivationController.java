@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.andropol1.service.ActivationService;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api")
 public class ActivationController {
 	private final ActivationService activationService;
 
@@ -17,7 +17,7 @@ public class ActivationController {
 	public ActivationController(ActivationService activationService) {
 		this.activationService = activationService;
 	}
-	@GetMapping("/activation")
+	@GetMapping("/user/activation")
 	public ResponseEntity<?> activation(@RequestParam String id){
 		boolean activation = activationService.activation(id);
 		if (activation){

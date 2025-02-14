@@ -21,7 +21,7 @@ bot:
   token: ${TG_BOT_TOKEN}
   file_info_uri: ${TG_BOT_FILE_INFO_URI}
   file_storage_uri: ${TG_BOT_FILE_STORAGE_URI}
-  linkAddress: ${TG_BOT_URI:127.0.0.1:8086}
+  linkAddress: ${TG_BOT_URI:http://127.0.0.1:8086}
 
 hash:
   salt: ${SALT}
