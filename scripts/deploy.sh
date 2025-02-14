@@ -2,7 +2,7 @@
 
 ENV_FILE="./.env"
 
-pushd ~/andropol1/ || exit
+pushd ~/filehosting-telegrambot/ || exit
 
 git checkout main
 git pull origin main
