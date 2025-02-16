@@ -61,7 +61,7 @@ services:
       TG_BOT_TOKEN: ${TG_BOT_TOKEN}
       TG_BOT_FILE_INFO_URI: ${TG_BOT_FILE_INFO_URI}
       TG_BOT_FILE_STORAGE_URI: ${TG_BOT_FILE_STORAGE_URI}
-      HOST_URL: ${HOST_URL}
+      TG_BOT_URI: ${TG_BOT_URI}
       SALT: ${SALT}
     logging:
       driver: 'json-file'
@@ -133,7 +133,7 @@ services:
     hostname: postgres
     image: postgres:14.5
     volumes:
-      - /postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
     ports:
       - ${POSTGRES_PORT_MAPPING}
     environment:
