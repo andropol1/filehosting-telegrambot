@@ -10,5 +10,5 @@ spring:
     password: ${POSTGRES_PASSWORD:postgres}
 
 decoder:
-  salt: ${SALT}
+  salt: ${SALT:OObFOTlC5DUxngrAU8iH}
   minHashLength: ${MIN_HASH_LENGTH:10}

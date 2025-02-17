@@ -3,11 +3,11 @@ server:
 
 spring:
   mail:
-    host: ${MAIL_HOST}
+    host: ${MAIL_HOST:smtp.yandex.ru}
     port: ${MAIL_PORT:465}
     protocol: ${MAIL_PROTOCOL:smtps}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
+    username: ${MAIL_USERNAME:telegram-mail-service@yandex.ru}
+    password: ${MAIL_PASSWORD:ncooyjfwvcmeckje}
     properties:
       mail:
         smtp:
@@ -17,7 +17,7 @@ spring:
 
 service:
   activation:
-    uri: ${ACTIVATION_URI}
+    uri: ${ACTIVATION_URI:http://127.0.0.1:8086/api/user/activation?id={id}}
 
 kafka:
-  registration_message: ${KAFKA_REGISTRATION_MESSAGE}
+  registration_message: ${KAFKA_REGISTRATION_MESSAGE:registration_message}

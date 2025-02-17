@@ -88,7 +88,7 @@ public class FileServiceImpl implements FileService {
 	@Override
 	public String generateLink(Long docId, LinkType linkType) {
 		String hash = hashids.encode(docId);
-		return botProperties.getLinkAddress() + "/api/" + linkType + "?id=" + hash;
+		return botProperties.getLinkAddress() + "/api" + linkType + "?id=" + hash;
 	}
 
 	private AppPhoto buildTransientAppPhoto(PhotoSize photo, BinaryContent persistentBinaryContent) {

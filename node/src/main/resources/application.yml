@@ -2,11 +2,11 @@ server:
   port: ${NODE_PORT:8085}
 
 kafka:
-  doc_message: ${KAFKA_DOC_MESSAGE}
-  photo_message: ${KAFKA_PHOTO_MESSAGE}
-  text_message: ${KAFKA_TEXT_MESSAGE}
-  answer_message: ${KAFKA_ANSWER_MESSAGE}
-  registration_message: ${KAFKA_REGISTRATION_MESSAGE}
+  doc_message: ${KAFKA_DOC_MESSAGE:doc_message}
+  photo_message: ${KAFKA_PHOTO_MESSAGE:photo_message}
+  text_message: ${KAFKA_TEXT_MESSAGE:text_message}
+  answer_message: ${KAFKA_ANSWER_MESSAGE:answer_message}
+  registration_message: ${KAFKA_REGISTRATION_MESSAGE:registration_message}
 
 spring:
   datasource:
@@ -18,11 +18,11 @@ spring:
     enabled: true
 
 bot:
-  token: ${TG_BOT_TOKEN}
-  file_info_uri: ${TG_BOT_FILE_INFO_URI}
-  file_storage_uri: ${TG_BOT_FILE_STORAGE_URI}
+  token: ${TG_BOT_TOKEN:7210054109:AAGGEWpCHyNBK__jnObakCQ6fpd29XGoxjM}
+  file_info_uri: ${TG_BOT_FILE_INFO_URI:https://api.telegram.org/bot{token}/getFile?file_id={fileId}}
+  file_storage_uri: ${TG_BOT_FILE_STORAGE_URI:https://api.telegram.org/file/bot{token}/{filePath}}
   linkAddress: ${TG_BOT_URI:http://127.0.0.1:8086}
 
 hash:
-  salt: ${SALT}
+  salt: ${SALT:OObFOTlC5DUxngrAU8iH}
   minHashLength: ${MIN_HASH_LENGTH:10}
