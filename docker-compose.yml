@@ -245,7 +245,6 @@ services:
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=false"
     command:
       - "--api.dashboard=true"
-      - "--api.insecure=true"
       - "--ping=true"
       - "--ping.entrypoint=ping"
       - "--entryPoints.ping.address=:8888"
