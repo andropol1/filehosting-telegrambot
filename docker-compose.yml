@@ -36,8 +36,8 @@ services:
     logging:
       driver: 'json-file'
       options:
-        max-size: '100m'
-        max-file: '3'
+        max-size: '10m'
+        max-file: '1'
     depends_on:
       kafka:
         condition: service_healthy
@@ -66,8 +66,8 @@ services:
     logging:
       driver: 'json-file'
       options:
-        max-size: '100m'
-        max-file: '3'
+        max-size: '10m'
+        max-file: '1'
     depends_on:
       kafka:
         condition: service_healthy
@@ -98,8 +98,8 @@ services:
     logging:
       driver: 'json-file'
       options:
-        max-size: '100m'
-        max-file: '3'
+        max-size: '10m'
+        max-file: '1'
     depends_on:
       postgres-db:
         condition: service_healthy
@@ -122,8 +122,8 @@ services:
     logging:
       driver: 'json-file'
       options:
-        max-size: '100m'
-        max-file: '3'
+        max-size: '10m'
+        max-file: '1'
     depends_on:
       kafka:
         condition: service_healthy
@@ -148,23 +148,6 @@ services:
       start_period: 60s
     restart: unless-stopped
 
-  zookeeper:
-    image: bitnami/zookeeper:latest
-    restart: unless-stopped
-    ports:
-      - ${ZOOKEEPER_PORT}:${ZOOKEEPER_PORT}
-    environment:
-      ZOO_MY_ID: ${ZOO_MY_ID}
-      ZOO_PORT: ${ZOOKEEPER_PORT}
-      ZOO_SERVERS: ${ZOO_SERVERS}
-      ALLOW_ANONYMOUS_LOGIN: ${ALLOW_ANONYMOUS_LOGIN}
-    healthcheck:
-      test: ["CMD", "echo", "ruok", "|", "nc", "${HOST_URL}", "${ZOOKEEPER_PORT}"]
-      interval: 10s
-      timeout: 10s
-      retries: 6
-      start_period: 30s
-
   kafka:
     container_name: kafka
     hostname: kafka
@@ -173,44 +156,35 @@ services:
     ports:
       - ${KAFKA_PORT}:${KAFKA_PORT}
     environment:
-      KAFKA_ADVERTISED_LISTENERS: ${KAFKA_ADVERTISED_LISTENERS}
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-      KAFKA_ZOOKEEPER_CONNECT: ${KAFKA_ZOOKEEPER_CONNECT}
       KAFKA_BROKER_ID: ${KAFKA_BROKER_ID}
-      KAFKA_LOG4J_LOGGERS: ${KAFKA_LOG4J_LOGGERS}
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: ${KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR}
-      KAFKA_CFG_ZOOKEEPER_CONNECT: ${KAFKA_ZOOKEEPER_CONNECT}
-      ALLOW_PLAINTEXT_LISTENER: ${ALLOW_PLAINTEXT_LISTENER}
-      KAFKA_LISTENERS: ${KAFKA_LISTENERS}
-      KAFKA_ZOOKEEPER_SESSION_TIMEOUT: ${KAFKA_ZOOKEEPER_SESSION_TIMEOUT}
-      KAFKA_RESTART_ATTEMPTS: ${KAFKA_RESTART_ATTEMPTS}
-      KAFKA_RESTART_DELAY: ${KAFKA_RESTART_DELAY}
-      ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: ${ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL}
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: ${KAFKA_AUTO_CREATE_TOPICS_ENABLE}
+      KAFKA_CFG_NODE_ID: ${KAFKA_CFG_NODE_ID}
+      KAFKA_CFG_PROCESS_ROLES: ${KAFKA_CFG_PROCESS_ROLES}
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: ${KAFKA_CFG_CONTROLLER_QUORUM_VOTERS}
+      KAFKA_CFG_LISTENERS: ${KAFKA_CFG_LISTENERS}
+      KAFKA_CFG_ADVERTISED_LISTENERS: ${KAFKA_CFG_ADVERTISED_LISTENERS}
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: ${KAFKA_CFG_INTER_BROKER_LISTENER_NAME}
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: ${KAFKA_CFG_CONTROLLER_LISTENER_NAMES}
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: ${KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP}
+      KAFKA_CFG_LOG_DIRS: ${KAFKA_CFG_LOG_DIRS}
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: ${KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE}
+      KAFKA_LOG4J_ROOT_LOGLEVEL: ${KAFKA_LOG4J_ROOT_LOGLEVEL}
+      KAFKA_LOG_RETENTION_HOURS: ${KAFKA_LOG_RETENTION_HOURS}
+      KAFKA_LOG_SEGMENT_BYTES: ${KAFKA_LOG_SEGMENT_BYTES}
+      KAFKA_LOG_RETENTION_BYTES: ${KAFKA_LOG_RETENTION_BYTES}
+      KAFKA_NUM_NETWORK_THREADS: ${KAFKA_NUM_NETWORK_THREADS}
+      KAFKA_NUM_IO_THREADS: ${KAFKA_NUM_IO_THREADS}
+      KAFKA_HEAP_OPTS: ${KAFKA_HEAP_OPTS}
+      KAFKA_SOCKET_SEND_BUFFER_BYTES: ${KAFKA_SOCKET_SEND_BUFFER_BYTES}
+      KAFKA_SOCKET_RECEIVE_BUFFER_BYTES: ${KAFKA_SOCKET_RECEIVE_BUFFER_BYTES}
+      KAFKA_SOCKET_REQUEST_MAX_BYTES: ${KAFKA_SOCKET_REQUEST_MAX_BYTES}
     volumes:
-      - kafka-data:/var/lib/kafka
+      - kafka-data:/bitnami/kafka
     healthcheck:
       test: ["CMD", "kafka-topics.sh", "--list", "--bootstrap-server", "${HOST_URL}:${KAFKA_PORT}"]
       interval: 20s
       timeout: 20s
       retries: 6
       start_period: 60s
-    depends_on:
-      zookeeper:
-        condition: service_healthy
-
-  kowl:
-    image: quay.io/cloudhut/kowl:v1.4.0
-    restart: on-failure
-    volumes:
-      - ./kowl_config:/etc/kowl/
-    ports:
-      - ${KOWL_PORT}:${KOWL_PORT}
-    entrypoint: ./kowl --config.filepath=/etc/kowl/config.yml
-    depends_on:
-      kafka:
-        condition: service_healthy
 
   traefik:
     container_name: traefik

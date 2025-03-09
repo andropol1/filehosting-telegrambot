@@ -18,7 +18,7 @@ public class AppDocument {
 	private Long id;
 	private String telegramFileId;
 	private String docName;
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "binary_content_id", referencedColumnName = "id")
 	private BinaryContent binaryContent;
 	private String mimeType;

@@ -17,7 +17,7 @@ public class AppPhoto {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String telegramFileId;
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "binary_content_id", referencedColumnName = "id")
 	private BinaryContent binaryContent;
 	private Integer fileSize;

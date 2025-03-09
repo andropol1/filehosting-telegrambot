@@ -7,13 +7,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.andropol1.entity.BinaryContent;
 import ru.andropol1.exceptions.ResourceNotFoundException;
 import ru.andropol1.service.FileService;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.util.Optional;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
 
 @Log4j
 @RestController
